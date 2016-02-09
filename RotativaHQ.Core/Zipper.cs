@@ -1,4 +1,5 @@
-﻿using AngleSharp.Html;
+﻿using AngleSharp.Dom;
+using AngleSharp.Html;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -10,18 +11,18 @@ using System.Threading.Tasks;
 
 namespace RotativaHQ.Core
 {
-    public class Zipper
+    public static class Zipper
     {
-        public static byte[] ZipPage(string html, IMapPathResolver mapPathResolver)
+        private static void AddSerializedAssets(
+            this Dictionary<string, string> serialAssets, 
+            IEnumerable<IElement> elements, 
+            string uriAttribute
+            )
         {
-            var parser = new AngleSharp.Parser.Html.HtmlParser();
-            var doc = parser.Parse(html);
-            var images = doc.Images;
-            var serialImages = new Dictionary<string, string>();
-            foreach (var image in images)
+            foreach (var image in elements)
             {
                 var canSerialize = false;
-                var src = image.Attributes["src"].Value;
+                var src = image.Attributes[uriAttribute].Value;
                 if (src.ToLower().StartsWith("http"))
                 {
                     Uri url = new Uri(src);
@@ -38,10 +39,25 @@ namespace RotativaHQ.Core
                 {
                     var suffix = src.Split('.').Last();
                     var newSrc = Guid.NewGuid().ToString().Replace("-", "") + "." + suffix;
-                    image.Attributes["src"].Value = newSrc;
-                    serialImages.Add(src, newSrc);
+                    image.Attributes[uriAttribute].Value = newSrc;
+                    serialAssets.Add(src, newSrc);
                 }
             }
+        }
+
+        public static byte[] ZipPage(string html, IMapPathResolver mapPathResolver)
+        {
+            var parser = new AngleSharp.Parser.Html.HtmlParser();
+            var doc = parser.Parse(html);
+            var images = doc.Images;
+            var styles = doc.GetElementsByTagName("link")
+                .Where(l => l.Attributes["rel"].Value.Trim().ToLower() == "stylesheet");
+            var scripts = doc.GetElementsByTagName("script");
+            var serialAssets = new Dictionary<string, string>();
+            serialAssets.AddSerializedAssets(images, "src");
+            serialAssets.AddSerializedAssets(scripts, "src");
+            serialAssets.AddSerializedAssets(styles, "href");
+            
             var newHtml = doc.ToHtml(new HtmlMarkupFormatter());
             using (var ms = new MemoryStream())
             {
@@ -56,13 +72,13 @@ namespace RotativaHQ.Core
                             writer.Write(newHtml);
                         }
     			    }
-                    foreach (var serialImage in serialImages)
+                    foreach (var serialAsset in serialAssets)
                     {
-                        var nentry = zipArchive.CreateEntry(serialImage.Value, CompressionLevel.Fastest);
+                        var nentry = zipArchive.CreateEntry(serialAsset.Value, CompressionLevel.Fastest);
                         using (var writer = new BinaryWriter(nentry.Open()))
                         {
                             //var image = File.ReadAllBytes(Path.Combine(rootPath,"Content", "test.png"));
-                            var path = mapPathResolver.MapPath(serialImage.Key);
+                            var path = mapPathResolver.MapPath(serialAsset.Key);
                             var image = File.ReadAllBytes(path);
                             writer.Write(image);
                         }

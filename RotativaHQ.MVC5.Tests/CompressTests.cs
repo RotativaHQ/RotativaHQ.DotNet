@@ -17,11 +17,13 @@ namespace RotativaHQ.MVC5.Tests
         [Fact(DisplayName="should contain zipped html")]
         public void Zipped()
         {
-            var html = "<html>Hello <img src=\"Content/test.png\" /></html>";
+            var html = "<html><head><link href=\"~/Content/Site.css\" rel=\"stylesheet\" /></head>Hello <img src=\"Content/test.png\" /></html>";
             string rootpath = AppDomain.CurrentDomain.BaseDirectory;
             var mockPathResolver = new Mock<IMapPathResolver>();
             mockPathResolver.Setup(x => x.MapPath("Content/test.png"))
-                .Returns(Path.Combine(rootpath,"Content","test.png"));
+                .Returns(Path.Combine(rootpath, "Content", "test.png"));
+            mockPathResolver.Setup(x => x.MapPath("~/Content/Site.css"))
+                .Returns(Path.Combine(rootpath, "Content", "Site.css"));
             byte[] zippedHtml = Zipper.ZipPage(html, mockPathResolver.Object);
 
 
@@ -29,7 +31,7 @@ namespace RotativaHQ.MVC5.Tests
             //fileStream.Position = 0;
             using (var zip = new ZipArchive(fileStream, ZipArchiveMode.Read))
             {
-                Assert.Equal(2, zip.Entries.Count);
+                Assert.Equal(3, zip.Entries.Count);
                 foreach (var entry in zip.Entries)
                 {
                     using (var stream = entry.Open())
