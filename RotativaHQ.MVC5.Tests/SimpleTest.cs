@@ -48,7 +48,6 @@ namespace RotativaHQ.MVC5.Tests
             var pdfLink = rotativaDemoUrl + "/Home/Simple";
             using (var webClient = new WebClient())
             {
-                
                 var pdf = webClient.DownloadData(new Uri(pdfLink));
                 var pdfTester = new PdfTester();
                 pdfTester.LoadPdf(pdf);

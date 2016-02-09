@@ -100,9 +100,6 @@ namespace RotativaHQ.MVC5
                 StringBuilder html = sw.GetStringBuilder();
 
                 // replace href and src attributes with full URLs
-                string baseUrl = string.Format("{0}://{1}", HttpContext.Current.Request.Url.Scheme, HttpContext.Current.Request.Url.Authority);
-                html.Replace(" href=\"/", string.Format(" href=\"{0}/", baseUrl));
-                html.Replace(" src=\"/", string.Format(" src=\"{0}/", baseUrl));
                 var apiKey = ConfigurationManager.AppSettings["RotativaKey"].ToString();
                 var client = new RotativaHqClient(apiKey);
                 var fileUrl = client.GetPdfUrl(GetConvertOptions(), html.ToString(), this.FileName);

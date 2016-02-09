@@ -1,8 +1,11 @@
 ﻿using Newtonsoft.Json.Linq;
+using ProtoBuf;
+using RotativaHQ.Core;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
@@ -11,6 +14,7 @@ using System.Security.Claims;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Web;
 
 namespace RotativaHQ.MVC5
 {
@@ -23,41 +27,6 @@ namespace RotativaHQ.MVC5
             this.apiKey = apiKey;
         }
 
-        public byte[] Call(string switches, string html)
-        {
-            var httpClient = new HttpClient();
-            //var html = File.ReadAllText(HostingEnvironment.ApplicationPhysicalPath + "/test.html");
-            using (
-                var request = CreateRequest("/", "application/json", HttpMethod.Post))
-            {
-                var postData = new List<KeyValuePair<string, string>>();
-                postData.Add(new KeyValuePair<string, string>("html", html));
-                postData.Add(new KeyValuePair<string, string>("switches", switches));
-                postData.Add(new KeyValuePair<string, string>("fileName", ""));
-
-                HttpContent content = new FormUrlEncodedContent(postData);
-                request.Content = content;
-
-                using (
-                    HttpResponseMessage response =
-                        httpClient.SendAsync(request, new CancellationTokenSource().Token).Result)
-                {
-                    var httpResponseMessage = response;
-                    var result = response.Content.ReadAsStringAsync();
-                    var jsonReponse = JObject.Parse(result.Result);
-                    if (response.StatusCode == HttpStatusCode.Unauthorized)
-                    {
-                        var error = jsonReponse["error"].Value<string>();
-                        throw new UnauthorizedAccessException(error);
-                    }
-                    var pdfUrl = jsonReponse["pdfUrl"].Value<string>(); // 
-                    var wc = new WebClient();
-                    var pdf = wc.DownloadData(pdfUrl); //Convert.FromBase64String(pdfString);
-                    return pdf;
-                }
-            }
-        }
-
         public string GetPdfUrl(string switches, string html, string fileName = "")
         {
             var httpClient = new HttpClient();
@@ -65,28 +34,38 @@ namespace RotativaHQ.MVC5
             using (
                 var request = CreateRequest("/", "application/json", HttpMethod.Post))
             {
-                var postData = new List<KeyValuePair<string, string>>();
-                postData.Add(new KeyValuePair<string, string>("fileName", fileName ?? ""));
-                postData.Add(new KeyValuePair<string, string>("html", html));
-                postData.Add(new KeyValuePair<string, string>("switches", switches));
-
-                HttpContent content = new FormUrlEncodedContent(postData);
-                request.Content = content;
-
-                using (
-                    HttpResponseMessage response =
-                        httpClient.SendAsync(request, new CancellationTokenSource().Token).Result)
+                byte[] zippedHtml = Zipper.ZipPage(html, new MapPathResolver());
+                var payload = new PdfRequestPayload{
+                    Id = Guid.NewGuid(),
+                    Filename = fileName,
+                    Switches = "",
+                    ZippedHtmlPage = zippedHtml
+                };
+                
+                using (MemoryStream ms = new MemoryStream())
                 {
-                    var httpResponseMessage = response;
-                    var result = response.Content.ReadAsStringAsync();
-                    var jsonReponse = JObject.Parse(result.Result);
-                    if (response.StatusCode == HttpStatusCode.Unauthorized)
+                    var sw = new StreamWriter(ms, new UnicodeEncoding());
+                    Serializer.Serialize(ms, payload);
+                    ms.Position = 0;
+                    //HttpContent content = new FormUrlEncodedContent(postData);
+                    HttpContent content = new StreamContent(ms);
+                    request.Content = content;
+
+                    using (
+                        HttpResponseMessage response =
+                            httpClient.SendAsync(request, new CancellationTokenSource().Token).Result)
                     {
-                        var error = jsonReponse["error"].Value<string>();
-                        throw new UnauthorizedAccessException(error);
+                        var httpResponseMessage = response;
+                        var result = response.Content.ReadAsStringAsync();
+                        var jsonReponse = JObject.Parse(result.Result);
+                        if (response.StatusCode == HttpStatusCode.Unauthorized)
+                        {
+                            var error = jsonReponse["error"].Value<string>();
+                            throw new UnauthorizedAccessException(error);
+                        }
+                        var pdfUrl = jsonReponse["pdfUrl"].Value<string>(); // 
+                        return pdfUrl;
                     }
-                    var pdfUrl = jsonReponse["pdfUrl"].Value<string>(); // 
-                    return pdfUrl;
                 }
             }
         }

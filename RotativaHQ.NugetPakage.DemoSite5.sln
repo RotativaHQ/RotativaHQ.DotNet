@@ -9,6 +9,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RotativaHQ.MVC4", "Rotativa
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RotativaHq.MVC5.DemoSite", "RotativaHq.MVC5.DemoSite\RotativaHq.MVC5.DemoSite.csproj", "{CEFE2694-CBBA-4D00-93DE-77C7BCE0AF2C}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RotativaHQ.Core", "RotativaHQ.Core\RotativaHQ.Core.csproj", "{C52F7698-E8B7-478D-94FD-474F6F9D850D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +29,10 @@ Global
 		{CEFE2694-CBBA-4D00-93DE-77C7BCE0AF2C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{CEFE2694-CBBA-4D00-93DE-77C7BCE0AF2C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{CEFE2694-CBBA-4D00-93DE-77C7BCE0AF2C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C52F7698-E8B7-478D-94FD-474F6F9D850D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C52F7698-E8B7-478D-94FD-474F6F9D850D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C52F7698-E8B7-478D-94FD-474F6F9D850D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C52F7698-E8B7-478D-94FD-474F6F9D850D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
