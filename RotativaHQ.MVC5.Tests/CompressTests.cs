@@ -24,6 +24,8 @@ namespace RotativaHQ.MVC5.Tests
                 .Returns(Path.Combine(rootpath, "Content", "test.png"));
             mockPathResolver.Setup(x => x.MapPath("~/Content/Site.css"))
                 .Returns(Path.Combine(rootpath, "Content", "Site.css"));
+            mockPathResolver.Setup(x => x.MapPath("/Content/cheap_diagonal_fabric.png"))
+                .Returns(Path.Combine(rootpath, "Content", "test.png"));
             byte[] zippedHtml = Zipper.ZipPage(html, mockPathResolver.Object);
 
 
@@ -31,7 +33,7 @@ namespace RotativaHQ.MVC5.Tests
             //fileStream.Position = 0;
             using (var zip = new ZipArchive(fileStream, ZipArchiveMode.Read))
             {
-                Assert.Equal(3, zip.Entries.Count);
+                Assert.Equal(4, zip.Entries.Count);
                 foreach (var entry in zip.Entries)
                 {
                     using (var stream = entry.Open())
