@@ -34,7 +34,14 @@ namespace RotativaHQ.MVC5
             using (
                 var request = CreateRequest("/", "application/json", HttpMethod.Post))
             {
-                byte[] zippedHtml = Zipper.ZipPage(html, new MapPathResolver());
+                var context = HttpContext.Current;
+                var webRoot = string.Format("{0}://{1}{2}",
+                    context.Request.Url.Scheme,
+        			context.Request.Url.Host,
+        			context.Request.Url.Port == 80
+        			  ? string.Empty : ":" + context.Request.Url.Port);
+                webRoot = webRoot.TrimEnd('/');
+                byte[] zippedHtml = Zipper.ZipPage(html, new MapPathResolver(), webRoot);
                 var payload = new PdfRequestPayload{
                     Id = Guid.NewGuid(),
                     Filename = fileName,

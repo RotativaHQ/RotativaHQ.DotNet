@@ -16,12 +16,12 @@ $project.Object.References | Where-Object { $_.Name -eq 'System.Web.Mvc' } | For
 Write-Host "MVC version: " $MvcVersion
  
 #remove unnecessary Korzh.EasyQuery.MvcX assemblies from project references
-if ($MvcVersion.StartsWith("4.0")) {
+if ($MvcVersion.StartsWith("4.")) {
     $project.Object.References | Where-Object { ($_.Name.StartsWith("RotativaHQ.MVC")) -and !($_.Name.StartsWith("RotativaHQ.MVC4")) } | ForEach-Object { 
         $_.Remove()
     }
 }
-elseif ($MvcVersion.StartsWith("5.0")) {
+elseif ($MvcVersion.StartsWith("5.")) {
     $project.Object.References | Where-Object { ($_.Name.StartsWith("RotativaHQ.MVC")) -and !($_.Name.StartsWith("RotativaHQ.MVC5")) } | ForEach-Object { 
         $_.Remove()
     }

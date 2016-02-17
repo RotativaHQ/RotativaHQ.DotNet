@@ -25,4 +25,5 @@ textarea {
 }
 
 .test {
+    visibility: hidden;
 }

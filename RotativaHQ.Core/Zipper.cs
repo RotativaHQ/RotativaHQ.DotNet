@@ -2,6 +2,7 @@
 using AngleSharp.Html;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
@@ -14,8 +15,22 @@ namespace RotativaHQ.Core
 {
     public static class Zipper
     {
+        private static bool DetectBundle(string url)
+        {
+            var queryString = url.Split('?').LastOrDefault();
+            var localPath = url;
+            if (queryString != null && !url.Contains('.'))
+            {
+                return true;
+            }
+            return false;
+        }
+
         private static string ReturnLocalPath(string url)
         {
+            //if (DetectBundle(url))
+            //    return string.Empty;
+
             if (!url.ToLower().StartsWith("http"))
             {
                 return url;
@@ -37,29 +52,30 @@ namespace RotativaHQ.Core
             string uriAttribute
             )
         {
-            foreach (var image in elements)
+            foreach (var element in elements)
             {
-                //var canSerialize = false;
-                var src = image.Attributes[uriAttribute].Value;
-                //if (src.ToLower().StartsWith("http"))
-                //{
-                //    Uri url = new Uri(src);
-                //    var hostname = url.Host;
-                //    if (IsLocalhost(hostname))
-                //    {
-                //        src = url.LocalPath;
-                //        canSerialize = true;
-                //    }
-                //}
-                //else
-                //    canSerialize = true;
+                var src = element.Attributes[uriAttribute].Value;
                 var localPath = ReturnLocalPath(src);
                 if (localPath != string.Empty)
                 {
                     var suffix = src.Split('.').Last();
+                    if (suffix == localPath)
+                    {
+                        switch (element.TagName.ToLower())
+                        {
+                            case "link":
+                                suffix = "css";
+                                break;
+                            case "script":
+                                suffix = "js";
+                                break;
+                            default:
+                                break;
+                        };
+                    }
                     var newSrc = Guid.NewGuid().ToString().Replace("-", "") + "." + suffix;
-                    image.Attributes[uriAttribute].Value = newSrc;
-                    serialAssets.Add(src, newSrc);
+                    element.Attributes[uriAttribute].Value = newSrc;
+                    serialAssets.Add(localPath, newSrc);
                 }
             }
         }
@@ -89,7 +105,7 @@ namespace RotativaHQ.Core
         }
 
 
-        public static byte[] ZipPage(string html, IMapPathResolver mapPathResolver)
+        public static byte[] ZipPage(string html, IMapPathResolver mapPathResolver, string webRoot)
         {
             var parser = new AngleSharp.Parser.Html.HtmlParser();
             var doc = parser.Parse(html);
@@ -114,7 +130,15 @@ namespace RotativaHQ.Core
     			        var entry = zipArchive.CreateEntry("index.html", CompressionLevel.Fastest);
                         using (StreamWriter writer = new StreamWriter(entry.Open()))
                         {
-                            writer.Write(newHtml);
+                            try
+                            {
+                                writer.Write(newHtml);
+                            }
+                            catch (Exception ex)
+                            {
+                                EventLog.WriteEntry("demosite", ex.Message);
+                                throw;
+                            }
                             doneAssets.Add("index.html");
                         }
     			    }
@@ -122,8 +146,7 @@ namespace RotativaHQ.Core
                     {
                         if (!doneAssets.Contains(serialStyle.Value))
                         {
-                            var path = mapPathResolver.MapPath(serialStyle.Key);
-                            var style = File.ReadAllText(path);
+                            var style = GetStringAsset(serialStyle.Key, mapPathResolver, webRoot);
                             var urls = ExtaxtUrlsFromStyle(style);
                             foreach (var url in urls)
                             {
@@ -133,7 +156,7 @@ namespace RotativaHQ.Core
                                 style = style.Replace(url, newUrl);
                                 if (!doneAssets.Contains(newUrl))
                                 {
-                                    zipArchive.AddBinaryAssetToArchive(newUrl, localPath, mapPathResolver);
+                                    zipArchive.AddBinaryAssetToArchive(newUrl, localPath, mapPathResolver, webRoot);
                                     doneAssets.Add(newUrl);
                                 }
                             }
@@ -149,7 +172,8 @@ namespace RotativaHQ.Core
                     {
                         if (!doneAssets.Contains(serialAsset.Value))
                         {
-                            zipArchive.AddBinaryAssetToArchive(serialAsset.Value, serialAsset.Key, mapPathResolver);
+                            zipArchive.AddBinaryAssetToArchive(
+                                serialAsset.Value, serialAsset.Key, mapPathResolver, webRoot);
                             doneAssets.Add(serialAsset.Value);
                         }
                     }
@@ -158,18 +182,62 @@ namespace RotativaHQ.Core
             }
         }
 
+        public static string GetStringAsset(string path, IMapPathResolver mapPathResolver, string webRoot)
+        {
+            if (DetectBundle(path))
+            {
+                using (var webClient = new WebClient())
+                {
+                    var style = webClient.DownloadString(webRoot + path);
+                    return style;
+                }
+            }
+            var localpath = mapPathResolver.MapPath(path);
+            if (File.Exists(localpath))
+            { 
+                var style = File.ReadAllText(localpath);
+                return style;
+            }
+            else
+            {
+                return string.Empty;
+            }
+        }
+
+        public static byte[] GetBnaryAsset(string path, IMapPathResolver mapPathResolver, string webRoot)
+        {
+            if (DetectBundle(path))
+            {
+                using (var webClient = new WebClient())
+                {
+                    var asset = webClient.DownloadData(webRoot + path);
+                    return asset;
+                }
+            }
+            var localpath = mapPathResolver.MapPath(path);
+            if (File.Exists(localpath))
+            {
+                var asset = File.ReadAllBytes(localpath);
+                return asset;
+            }
+            else
+            {
+                throw new ArgumentException("no asset foun for "+ path);
+            }
+        }
+
         private static void AddBinaryAssetToArchive(
             this ZipArchive zipArchive, 
             string serialAssetName, 
             string serialAssetPath,
-            IMapPathResolver mapPathResolver)
+            IMapPathResolver mapPathResolver, string webRoot)
         {
+            
             var nentry = zipArchive.CreateEntry(serialAssetName, CompressionLevel.Fastest);
             using (var writer = new BinaryWriter(nentry.Open()))
             {
-                var path = mapPathResolver.MapPath(serialAssetPath);
-                var image = File.ReadAllBytes(path);
-                writer.Write(image);
+                var asset = GetBnaryAsset(serialAssetPath, mapPathResolver, webRoot);
+                writer.Write(asset);
             }
         }
 
