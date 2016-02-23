@@ -41,7 +41,8 @@ namespace RotativaHQ.MVC5
         			context.Request.Url.Port == 80
         			  ? string.Empty : ":" + context.Request.Url.Port);
                 webRoot = webRoot.TrimEnd('/');
-                byte[] zippedHtml = Zipper.ZipPage(html, new MapPathResolver(), webRoot);
+                var requestPath = context.Request.Path;
+                byte[] zippedHtml = Zipper.ZipPage(html, new MapPathResolver(), webRoot, requestPath);
                 var payload = new PdfRequestPayload{
                     Id = Guid.NewGuid(),
                     Filename = fileName,

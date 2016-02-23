@@ -20,13 +20,13 @@ namespace RotativaHQ.MVC5.Tests
             var html = "<html><head><link href=\"~/Content/Site.css\" rel=\"stylesheet\" /></head>Hello <img src=\"Content/test.png\" /></html>";
             string rootpath = AppDomain.CurrentDomain.BaseDirectory;
             var mockPathResolver = new Mock<IMapPathResolver>();
-            mockPathResolver.Setup(x => x.MapPath("Content/test.png"))
+            mockPathResolver.Setup(x => x.MapPath("", "Content/test.png"))
                 .Returns(Path.Combine(rootpath, "Content", "test.png"));
-            mockPathResolver.Setup(x => x.MapPath("~/Content/Site.css"))
+            mockPathResolver.Setup(x => x.MapPath("", "~/Content/Site.css"))
                 .Returns(Path.Combine(rootpath, "Content", "Site.css"));
-            mockPathResolver.Setup(x => x.MapPath("/Content/cheap_diagonal_fabric.png"))
+            mockPathResolver.Setup(x => x.MapPath("", "../../images/cheap_diagonal_fabric.png"))
                 .Returns(Path.Combine(rootpath, "Content", "test.png"));
-            byte[] zippedHtml = Zipper.ZipPage(html, mockPathResolver.Object, "http://localhost:57399");
+            byte[] zippedHtml = Zipper.ZipPage(html, mockPathResolver.Object, "http://localhost:57399", "");
 
 
             var fileStream = new MemoryStream(zippedHtml);
@@ -62,19 +62,19 @@ namespace RotativaHQ.MVC5.Tests
             var html = "<html><head><link href=\"/Content/css?v=peG2vCX8wlIEw2lPUnRL6uPAxina05CUT_UoTb_UXfw1\" rel=\"stylesheet\"/><script src=\"/bundles/modernizr?v=wBEWDufH_8Md-Pbioxomt90vm6tJN2Pyy9u9zHtWsPo1\"></script></head>Hello <img src=\"Content/test.png\" /></html>";
             string rootpath = AppDomain.CurrentDomain.BaseDirectory;
             var mockPathResolver = new Mock<IMapPathResolver>();
-            mockPathResolver.Setup(x => x.MapPath("Content/test.png"))
+            mockPathResolver.Setup(x => x.MapPath("", "Content/test.png"))
                 .Returns(Path.Combine(rootpath, "Content", "test.png"));
-            mockPathResolver.Setup(x => x.MapPath("../fonts/glyphicons-halflings-regular.eot"))
+            mockPathResolver.Setup(x => x.MapPath("", "../fonts/glyphicons-halflings-regular.eot"))
                 .Returns(Path.Combine(rootpath, "fonts", "glyphicons-halflings-regular.eot"));
-            mockPathResolver.Setup(x => x.MapPath("../fonts/glyphicons-halflings-regular.svg"))
+            mockPathResolver.Setup(x => x.MapPath("", "../fonts/glyphicons-halflings-regular.svg"))
                 .Returns(Path.Combine(rootpath, "fonts", "glyphicons-halflings-regular.svg"));
-            mockPathResolver.Setup(x => x.MapPath("../fonts/glyphicons-halflings-regular.ttf"))
+            mockPathResolver.Setup(x => x.MapPath("", "../fonts/glyphicons-halflings-regular.ttf"))
                 .Returns(Path.Combine(rootpath, "fonts", "glyphicons-halflings-regular.ttf"));
-            mockPathResolver.Setup(x => x.MapPath("../fonts/glyphicons-halflings-regular.woff"))
+            mockPathResolver.Setup(x => x.MapPath("", "../fonts/glyphicons-halflings-regular.woff"))
                 .Returns(Path.Combine(rootpath, "fonts", "glyphicons-halflings-regular.woff"));
-            mockPathResolver.Setup(x => x.MapPath("/Content/cheap_diagonal_fabric.png"))
+            mockPathResolver.Setup(x => x.MapPath("", "../../images/cheap_diagonal_fabric.png"))
                 .Returns(Path.Combine(rootpath, "Content", "test.png"));
-            byte[] zippedHtml = Zipper.ZipPage(html, mockPathResolver.Object, "http://localhost:57399");
+            byte[] zippedHtml = Zipper.ZipPage(html, mockPathResolver.Object, "http://localhost:57399", "");
 
 
             var fileStream = new MemoryStream(zippedHtml);

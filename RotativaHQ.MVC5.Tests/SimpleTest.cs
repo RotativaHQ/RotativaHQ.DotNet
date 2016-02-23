@@ -51,8 +51,27 @@ namespace RotativaHQ.MVC5.Tests
                 var pdf = webClient.DownloadData(new Uri(pdfLink));
                 var pdfTester = new PdfTester();
                 pdfTester.LoadPdf(pdf);
-                Assert.True(pdfTester.PdfIsValid);
-                Assert.True(pdfTester.PdfContains("page"));
+                Assert.True(pdfTester.PdfIsValid, "it's not a valid pdf");
+                Assert.True(pdfTester.PdfContains("page"), "it doesn't contain searched text");
+            }
+        }
+    }
+
+    [Trait("RotativaHQ", "calling a page with Javascript script and small (100) delay")]
+    public class ScriptJsTest
+    {
+        [Fact(DisplayName="should return the link to valid pdf")]
+        public void ValidPdf()
+        {
+            var rotativaDemoUrl = ConfigurationManager.AppSettings["RotativaDemoUrl"];
+            var pdfLink = rotativaDemoUrl + "/Home/ScriptJs";
+            using (var webClient = new WebClient())
+            {
+                var pdf = webClient.DownloadData(new Uri(pdfLink));
+                var pdfTester = new PdfTester();
+                pdfTester.LoadPdf(pdf);
+                Assert.True(pdfTester.PdfIsValid, "it's not a valid pdf");
+                Assert.True(pdfTester.PdfContains("whooah"), "it doesn't contain searched text");
             }
         }
     }

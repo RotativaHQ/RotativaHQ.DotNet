@@ -10,9 +10,19 @@ namespace RotativaHQ.MVC5
 {
     public class MapPathResolver : IMapPathResolver
     {
-        public string MapPath(string virtualPath)
+        public string MapPath(string startPath, string virtualPath)
         {
-            return HttpContext.Current.Server.MapPath(virtualPath);
+            string localPath = "";
+            if (virtualPath.StartsWith("/"))
+            {
+                localPath = HttpContext.Current.Server.MapPath(virtualPath);
+            }
+            else
+            {
+                startPath = startPath.Remove(startPath.LastIndexOf('/') + 1);
+                localPath = HttpContext.Current.Server.MapPath(startPath + virtualPath);
+            }
+            return localPath;
         }
     }
 }

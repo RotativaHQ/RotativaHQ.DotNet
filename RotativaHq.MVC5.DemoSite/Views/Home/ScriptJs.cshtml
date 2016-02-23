@@ -24,5 +24,12 @@
     <div>
         <img src="http://localhost:57399/Content/test.png" />
     </div>
+    @Scripts.Render("~/bundles/jquery")
+    @Scripts.Render("~/bundles/bootstrap")
+    <script>
+        jQuery(document).ready(function () {
+            setTimeout(function () { $('#jstext')[0].innerHTML = 'whooah'; }, 100);
+        });
+    </script>
 </body>
 </html>

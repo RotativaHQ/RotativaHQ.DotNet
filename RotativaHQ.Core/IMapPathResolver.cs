@@ -8,6 +8,6 @@ namespace RotativaHQ.Core
 {
     public interface IMapPathResolver
     {
-        string MapPath(string virtualPath);
+        string MapPath(string startPath, string virtualPath);
     }
 }

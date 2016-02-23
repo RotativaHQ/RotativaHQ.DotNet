@@ -31,6 +31,12 @@ namespace RotativaHq.MVC5.DemoSite.Controllers
         public ActionResult Simple()
         {
             return new ViewAsPdf();
+            //return View();
+        }
+        public ActionResult ScriptJs()
+        {
+            return new ViewAsPdf();
+            //return View();
         }
     }
 }
