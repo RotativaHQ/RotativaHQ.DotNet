@@ -149,26 +149,30 @@ namespace RotativaHQ.Core
                     {
                         if (!doneAssets.Contains(serialStyle.Value))
                         {
-                            var style = GetStringAsset(serialStyle.Key, mapPathResolver, webRoot, pagePath);
-                            var urls = ExtaxtUrlsFromStyle(style);
-                            foreach (var url in urls)
+                            var style = 
+                                GetStringAsset(serialStyle.Key, mapPathResolver, webRoot, pagePath);
+                            if (!string.IsNullOrEmpty(style))
                             {
-                                var localPath = ReturnLocalPath(url);
-                                var suffix = localPath.Split('.').Last();
-                                var newUrl = Guid.NewGuid().ToString().Replace("-", "") + "." + suffix;
-                                style = style.Replace(url, newUrl);
-                                if (!doneAssets.Contains(newUrl))
+                                var urls = ExtaxtUrlsFromStyle(style);
+                                foreach (var url in urls)
                                 {
-                                    zipArchive.AddBinaryAssetToArchive(newUrl, localPath, mapPathResolver, webRoot, serialStyle.Key);
-                                    doneAssets.Add(newUrl);
+                                    var localPath = ReturnLocalPath(url);
+                                    var suffix = localPath.Split('.').Last();
+                                    var newUrl = Guid.NewGuid().ToString().Replace("-", "") + "." + suffix;
+                                    style = style.Replace(url, newUrl);
+                                    if (!doneAssets.Contains(newUrl))
+                                    {
+                                        zipArchive.AddBinaryAssetToArchive(newUrl, localPath, mapPathResolver, webRoot, serialStyle.Key);
+                                        doneAssets.Add(newUrl);
+                                    }
                                 }
+                                var sentry = zipArchive.CreateEntry(serialStyle.Value, CompressionLevel.Fastest);
+                                using (StreamWriter writer = new StreamWriter(sentry.Open()))
+                                {
+                                    writer.Write(style);
+                                }
+                                doneAssets.Add(serialStyle.Value);
                             }
-                            var sentry = zipArchive.CreateEntry(serialStyle.Value, CompressionLevel.Fastest);
-                            using (StreamWriter writer = new StreamWriter(sentry.Open()))
-                            {
-                                writer.Write(style);
-                            }
-                            doneAssets.Add(serialStyle.Value);
                         }
                     }
                     foreach (var serialAsset in serialAssets)
@@ -207,7 +211,7 @@ namespace RotativaHQ.Core
             }
         }
 
-        public static byte[] GetBnaryAsset(string path, IMapPathResolver mapPathResolver, string webRoot, string pagePath)
+        public static byte[] GetBinaryAsset(string path, IMapPathResolver mapPathResolver, string webRoot, string pagePath)
         {
             if (DetectBundle(path))
             {
@@ -226,7 +230,7 @@ namespace RotativaHQ.Core
             }
             else
             {
-                throw new ArgumentException("no asset foun for "+ path);
+                return new byte[] { };
             }
         }
 
@@ -237,11 +241,14 @@ namespace RotativaHQ.Core
             IMapPathResolver mapPathResolver, string webRoot, string pagePath)
         {
             
-            var nentry = zipArchive.CreateEntry(serialAssetName, CompressionLevel.Fastest);
-            using (var writer = new BinaryWriter(nentry.Open()))
+            var asset = GetBinaryAsset(serialAssetPath, mapPathResolver, webRoot, pagePath);
+            if (asset.Length > 0)
             {
-                var asset = GetBnaryAsset(serialAssetPath, mapPathResolver, webRoot, pagePath);
-                writer.Write(asset);
+                var nentry = zipArchive.CreateEntry(serialAssetName, CompressionLevel.Fastest);
+                using (var writer = new BinaryWriter(nentry.Open()))
+                {
+                    writer.Write(asset);
+                }
             }
         }
 

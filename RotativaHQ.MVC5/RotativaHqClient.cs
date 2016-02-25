@@ -30,7 +30,6 @@ namespace RotativaHQ.MVC5
         public string GetPdfUrl(string switches, string html, string fileName = "")
         {
             var httpClient = new HttpClient();
-            //var html = File.ReadAllText(HostingEnvironment.ApplicationPhysicalPath + "/test.html");
             using (
                 var request = CreateRequest("/", "application/json", HttpMethod.Post))
             {
@@ -46,7 +45,7 @@ namespace RotativaHQ.MVC5
                 var payload = new PdfRequestPayload{
                     Id = Guid.NewGuid(),
                     Filename = fileName,
-                    Switches = "",
+                    Switches = switches,
                     ZippedHtmlPage = zippedHtml
                 };
                 
@@ -55,7 +54,6 @@ namespace RotativaHQ.MVC5
                     var sw = new StreamWriter(ms, new UnicodeEncoding());
                     Serializer.Serialize(ms, payload);
                     ms.Position = 0;
-                    //HttpContent content = new FormUrlEncodedContent(postData);
                     HttpContent content = new StreamContent(ms);
                     request.Content = content;
 
