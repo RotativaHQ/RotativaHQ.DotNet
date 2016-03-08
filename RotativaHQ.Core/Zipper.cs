@@ -55,6 +55,14 @@ namespace RotativaHQ.Core
             foreach (var element in elements)
             {
                 var src = element.Attributes[uriAttribute].Value;
+                // remove any querystring from images
+                if (element.TagName.ToLower() == "img")
+                {
+                    var qI = src.LastIndexOf('?');
+                    if (qI > 0) src = src.Substring(0, qI);
+                    var hI = src.LastIndexOf('#');
+                    if (hI > 0) src = src.Substring(0, hI);
+                }
                 var localPath = ReturnLocalPath(src);
                 if (localPath != string.Empty)
                 {

@@ -38,5 +38,17 @@ namespace RotativaHq.MVC5.DemoSite.Controllers
             return new ViewAsPdf();
             //return View();
         }
+
+        public ActionResult InvalidCss()
+        {
+            return new ViewAsPdf();
+            //return View();
+        }
+
+        public ActionResult LongImagePath()
+        {
+            return new ViewAsPdf();
+            //return View();
+        }
     }
 }

@@ -2,7 +2,7 @@
 <package >
   <metadata>
     <id>RotativaHQ</id>
-    <version>1.1.4</version>
+    <version>1.1.5</version>
     <title>RotativaHQ</title>
     <authors>Giorgio Bozio</authors>
     <owners>Giorgio Bozio</owners>
@@ -11,7 +11,7 @@
     <iconUrl>http://www.rotativahq.com/content/image/logo-for-nuget.png</iconUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>RotativaHQ could service client</description>
-    <releaseNotes>Some fixes.</releaseNotes>
+    <releaseNotes>Better handling of HTML assets.</releaseNotes>
     <copyright>Copyright 2016</copyright>
     <tags>Rotativa PDF AspNetMVC</tags>
     </metadata>

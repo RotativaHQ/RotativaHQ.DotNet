@@ -224,7 +224,7 @@ namespace RotativaHQ.MVC5
         public override void ExecuteResult(ControllerContext context)
         {
             var fileUrl = BuildPdf(context);
-
+            
             var response = PrepareResponse(context.HttpContext.Response);
 
             //response.OutputStream.Write(fileContent, 0, fileContent.Length);

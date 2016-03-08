@@ -1,0 +1,101 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Net;
+using System.Net.Http;
+using System.Net.Http.Headers;
+using System.Text;
+using System.Threading.Tasks;
+using System.Web;
+using System.Web.Mvc;
+using System.Web.Routing;
+
+namespace RotativaHQ.MVC5
+{
+    public class DummyPdfController : Controller { }
+
+    public static class PdfHelper
+    {
+        /// <summary>
+        /// Creates an instance of an MVC controller from scratch 
+        /// when no existing ControllerContext is present       
+        /// </summary>
+        /// <typeparam name="T">Type of the controller to create</typeparam>
+        /// <returns>Controller Context for T</returns>
+        /// <exception cref="InvalidOperationException">thrown if HttpContext not available</exception>
+        public static T CreateController<T>(RouteData routeData = null)
+                    where T : Controller, new()
+        {
+            // create a disconnected controller instance
+            T controller = new T();
+
+            // get context wrapper from HttpContext if available
+            HttpContextBase wrapper = null;
+            if (HttpContext.Current != null)
+                wrapper = new HttpContextWrapper(System.Web.HttpContext.Current);
+            else
+                throw new InvalidOperationException(
+                    "Can't create Controller Context if no active HttpContext instance is available.");
+
+            if (routeData == null)
+                routeData = new RouteData();
+
+            // add the controller routing if not existing
+            if (!routeData.Values.ContainsKey("controller") && !routeData.Values.ContainsKey("Controller"))
+                routeData.Values.Add("controller", controller.GetType().Name
+                                                            .ToLower()
+                                                            .Replace("controller", ""));
+
+            controller.ControllerContext = new ControllerContext(wrapper, routeData, controller);
+            return controller;
+        }
+
+        public static string GetPdfUrl(
+            string view, object model = null, string filename = null, string switches = null)
+        {
+            var viewAsPdf = new ViewAsPdf(view, model)
+            {
+                CustomSwitches = switches ?? "",
+                FileName = filename
+            };
+            var dummyController = CreateController<DummyPdfController>();
+            var pdfUri = viewAsPdf.BuildPdf(dummyController.ControllerContext);
+            return pdfUri;
+        }
+
+        public static byte[] GetPdf(
+            string view, object model = null, string filename = null, string switches = null)
+        {
+            var pdfUri = GetPdfUrl(view, model, filename, switches);
+
+            using (var client = new WebClient())
+            {
+                var pdf = client.DownloadData(pdfUri);
+                return pdf;
+            }
+        }
+
+        public static HttpResponseMessage CreatePdfResponse(this HttpRequestMessage request, 
+            string view, object model = null, string filename = null, string switches = null)
+        {
+            var pdfUri = GetPdfUrl(view, model, filename, switches);
+            HttpResponseMessage result = new HttpResponseMessage(HttpStatusCode.OK);
+            using (var client = new WebClient())
+            {
+                var pdf = client.DownloadData(pdfUri);
+                result.Content = new ByteArrayContent(pdf);
+                result.Content.Headers.ContentType = new MediaTypeHeaderValue("application/pdf");
+                if (!string.IsNullOrEmpty(filename))
+                {
+                    result.Content.Headers.ContentDisposition = new ContentDispositionHeaderValue("attachment")
+                    {
+                        FileName = filename
+                    };
+                }
+                return result;
+            }
+        }
+
+        
+    }
+}

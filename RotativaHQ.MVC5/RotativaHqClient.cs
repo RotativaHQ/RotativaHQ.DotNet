@@ -93,18 +93,14 @@ namespace RotativaHQ.MVC5
         protected HttpRequestMessage CreateRawRequest(string url, string mthv, HttpMethod method)
         {
             var apiUrl = ConfigurationManager.AppSettings["RotativaUrl"].ToString();
-            //var apiUrl = "http://localhost:1282";
-            //var apiUrl = "http://localhost:53460";
             var request = new HttpRequestMessage
             {
                 RequestUri = new Uri(apiUrl + url)
             };
-            //HttpContext.Current = new HttpContext(new HttpRequest(null, apiUrl + url, null), new HttpResponse(null));
-            //HttpContext.Current.User = new ClaimsPrincipal(new ClaimsIdentity());
             request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue(mthv));
             request.Method = method;
             Debug.WriteLine("Method: " + request.Method);
-            Debug.WriteLine("Url: " + request.RequestUri);
+            Debug.WriteLine("URL: " + request.RequestUri);
             Debug.WriteLine("Headers: ");
             Debug.WriteLine("\t" + request.Headers.ToString());
             return request;

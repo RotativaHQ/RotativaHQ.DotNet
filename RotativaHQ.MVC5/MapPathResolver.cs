@@ -20,7 +20,20 @@ namespace RotativaHQ.MVC5
             else
             {
                 startPath = startPath.Remove(startPath.LastIndexOf('/') + 1);
-                localPath = HttpContext.Current.Server.MapPath(startPath + virtualPath);
+                try
+                {
+                    
+                    localPath = HttpContext.Current.Server.MapPath(startPath + virtualPath);
+                }
+                catch (HttpException hex)
+                {
+                    var rootLocalPath = "/" + virtualPath.Replace("../", "");
+                    localPath = HttpContext.Current.Server.MapPath(rootLocalPath);
+                }
+                catch (Exception ex)
+                {
+                    localPath = virtualPath;
+                }
             }
             return localPath;
         }

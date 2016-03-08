@@ -89,6 +89,7 @@
   <ItemGroup>
     <Compile Include="AsPdfResultBase.cs" />
     <Compile Include="MapPathResolver.cs" />
+    <Compile Include="PdfHelper.cs" />
     <Compile Include="ViewAsPdf.cs" />
     <Compile Include="RotativaHqClient.cs" />
     <Compile Include="Margins.cs" />

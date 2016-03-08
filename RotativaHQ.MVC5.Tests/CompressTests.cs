@@ -24,8 +24,8 @@ namespace RotativaHQ.MVC5.Tests
                 .Returns(Path.Combine(rootpath, "Content", "test.png"));
             mockPathResolver.Setup(x => x.MapPath("", "~/Content/Site.css"))
                 .Returns(Path.Combine(rootpath, "Content", "Site.css"));
-            mockPathResolver.Setup(x => x.MapPath("", "../../images/cheap_diagonal_fabric.png"))
-                .Returns(Path.Combine(rootpath, "Content", "test.png"));
+            mockPathResolver.Setup(x => x.MapPath("~/Content/Site.css", "/Content/cheap_diagonal_fabric.png"))
+                .Returns(Path.Combine(rootpath, "Content", "cheap_diagonal_fabric.png"));
             byte[] zippedHtml = Zipper.ZipPage(html, mockPathResolver.Object, "http://localhost:57399", "");
 
 
@@ -81,7 +81,7 @@ namespace RotativaHQ.MVC5.Tests
             //fileStream.Position = 0;
             using (var zip = new ZipArchive(fileStream, ZipArchiveMode.Read))
             {
-                Assert.Equal(9, zip.Entries.Count);
+                Assert.Equal(4, zip.Entries.Count);
                 Assert.True(zip.Entries.ToList().Exists(x => x.Name.EndsWith(".css")), "no css file");
                 foreach (var entry in zip.Entries)
                 {

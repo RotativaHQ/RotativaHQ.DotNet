@@ -38,22 +38,53 @@ namespace RotativaHQ.MVC5.Tests
         }
     }
 
-    [Trait("RotativaHQ", "calling a simple page")]
-    public class SimpleTest
+    public abstract class BaseWebClientTest
     {
-        [Fact(DisplayName="should return the link to valid pdf")]
-        public void ValidPdf()
+        protected readonly static string RotativaDemoUrl = ConfigurationManager.AppSettings["RotativaDemoUrl"];
+        private PdfTester pdfTester { get; set; }
+
+        public BaseWebClientTest()
         {
-            var rotativaDemoUrl = ConfigurationManager.AppSettings["RotativaDemoUrl"];
-            var pdfLink = rotativaDemoUrl + "/Home/Simple";
+            pdfTester = new PdfTester();
+        }
+
+        protected async Task GetPdfForAction(string action, Action<PdfTester> assertCallback)
+        {
+            var pdfLink = RotativaDemoUrl + action;
             using (var webClient = new WebClient())
             {
-                var pdf = webClient.DownloadData(new Uri(pdfLink));
-                var pdfTester = new PdfTester();
+                var pdf = await webClient.DownloadDataTaskAsync(new Uri(pdfLink));
                 pdfTester.LoadPdf(pdf);
                 Assert.True(pdfTester.PdfIsValid, "it's not a valid pdf");
-                Assert.True(pdfTester.PdfContains("page"), "it doesn't contain searched text");
+                assertCallback(pdfTester);
             }
+        }
+
+        protected async Task VerifyPdfForAction(string action, string verifyText)
+        {
+            await GetPdfForAction(action, pdfTester => {
+                Assert.True(pdfTester.PdfContains(verifyText), "it doesn't contain searched text");
+            });
+        }
+    }
+
+    [Trait("RotativaHQ", "calling a simple page")]
+    public class SimpleTest: BaseWebClientTest
+    {
+        [Fact(DisplayName="should return the link to valid pdf")]
+        public async Task ValidPdf()
+        {
+            await VerifyPdfForAction("/Home/Simple", "page"); 
+        }
+    }
+
+    [Trait("RotativaHQ", "calling a page with invalid css url")]
+    public class InvalidCssTest: BaseWebClientTest
+    {
+        [Fact(DisplayName="should return the link to valid pdf")]
+        public async Task ValidPdf()
+        {
+            await VerifyPdfForAction("/Home/InvalidCss", "page"); 
         }
     }
 
