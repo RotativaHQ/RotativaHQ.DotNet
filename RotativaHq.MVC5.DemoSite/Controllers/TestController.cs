@@ -18,7 +18,7 @@ namespace RotativaHq.MVC5.DemoSite.Controllers
 
         public dynamic Get(int id)
         {
-            var pdfUrl = PdfHelper.GetPdfUrl("~/Views/Home/Simple.cshtml");
+            var pdfUrl = PdfHelper.GetPdfUrl("~/Views/Home/Simple.cshtml", filename: "simple.pdf");
             return new { PdfUrl = pdfUrl };
         }
     }

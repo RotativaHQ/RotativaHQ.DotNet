@@ -203,8 +203,16 @@ namespace RotativaHQ.Core
             {
                 using (var webClient = new WebClient())
                 {
-                    var style = webClient.DownloadString(webRoot + path);
-                    return style;
+                    try
+                    {
+                        var style = webClient.DownloadString(webRoot + path);
+                        return style;
+                    }
+                    catch (WebException wex)
+                    {
+                        // TODO: log web exception
+                        return string.Empty;
+                    }
                 }
             }
             var localpath = mapPathResolver.MapPath(pagePath, path);

@@ -32,7 +32,6 @@ namespace RotativaHQ.MVC5
 
         public ViewAsPdf()
         {
-            WkhtmltopdfPath = string.Empty;
             MasterName = string.Empty;
             ViewName = string.Empty;
             Model = null;

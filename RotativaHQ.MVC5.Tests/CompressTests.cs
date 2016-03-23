@@ -105,5 +105,51 @@ namespace RotativaHQ.MVC5.Tests
             }
 
         }
+
+
+    }
+
+    [Trait("RotativaHQ", "zip file with duplicate asset reference")]
+    public class CompressDuplicateTests
+    {
+        [Fact(DisplayName="should package just one instance of asset")]
+        public void ManageDuplicate()
+        {
+            var html = "<html><head><link href=\"~/Content/SiteTestPng.css\" rel=\"stylesheet\" /></head>Hello <img src=\"/Content/test.png\" /></html>";
+            string rootpath = AppDomain.CurrentDomain.BaseDirectory;
+            var mockPathResolver = new Mock<IMapPathResolver>();
+            mockPathResolver.Setup(x => x.MapPath("", "/Content/test.png"))
+                .Returns(Path.Combine(rootpath, "Content", "test.png"));
+            mockPathResolver.Setup(x => x.MapPath("", "~/Content/SiteTestPng.css"))
+                .Returns(Path.Combine(rootpath, "Content", "SiteTestPng.css"));
+            byte[] zippedHtml = Zipper.ZipPage(html, mockPathResolver.Object, "http://localhost:57399", "");
+
+
+            var fileStream = new MemoryStream(zippedHtml);
+            //fileStream.Position = 0;
+            using (var zip = new ZipArchive(fileStream, ZipArchiveMode.Read))
+            {
+                Assert.Equal(3, zip.Entries.Count);
+                foreach (var entry in zip.Entries)
+                {
+                    using (var stream = entry.Open())
+                    {
+                        // do whatever we want with stream
+                        // ...
+                        //stream.Position = 0;
+                        var sr = new StreamReader(stream);
+                        if (entry.Name.ToLower() == "index.html")
+                        {
+                            var myStr = sr.ReadToEnd();
+                            var parser = new AngleSharp.Parser.Html.HtmlParser();
+                            var doc = parser.Parse(myStr);
+                            Assert.Equal(1, doc.Images.Count());
+                            Assert.NotEqual("Content/test.png", doc.Images[0].Attributes["src"].Value);
+                            //Assert.Equal(html, myStr);
+                        }
+                    }
+                }
+            }
+        }
     }
 }

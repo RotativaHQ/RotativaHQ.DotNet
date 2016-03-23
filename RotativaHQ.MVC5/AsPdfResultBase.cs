@@ -22,26 +22,6 @@ namespace RotativaHQ.MVC5
         public string FileName { get; set; }
 
         /// <summary>
-        /// Path to wkhtmltopdf binary.
-        /// </summary>
-        public string WkhtmltopdfPath { get; set; }
-
-        /// <summary>
-        /// Custom name of authentication cookie used by forms authentication.
-        /// </summary>
-        [Obsolete("Use FormsAuthenticationCookieName instead of CookieName.")]
-        public string CookieName
-        {
-            get { return FormsAuthenticationCookieName; }
-            set { FormsAuthenticationCookieName = value; }
-        }
-
-        /// <summary>
-        /// Custom name of authentication cookie used by forms authentication.
-        /// </summary>
-        public string FormsAuthenticationCookieName { get; set; }
-
-        /// <summary>
         /// Sets the page margins.
         /// </summary>
         public Margins PageMargins { get; set; }
@@ -71,18 +51,6 @@ namespace RotativaHQ.MVC5
         /// </summary>
         [OptionFlag("-O")]
         public Orientation? PageOrientation { get; set; }
-
-        /// <summary>
-        /// Sets cookies.
-        /// </summary>
-        [OptionFlag("--cookie")]
-        public Dictionary<string, string> Cookies { get; set; }
-
-        /// <summary>
-        /// Sets post values.
-        /// </summary>
-        [OptionFlag("--post")]
-        public Dictionary<string, string> Post { get; set; }
 
         /// <summary>
         /// Indicates whether the page can run JavaScript.
@@ -121,24 +89,6 @@ namespace RotativaHQ.MVC5
         public bool IsGrayScale { get; set; }
 
         /// <summary>
-        /// Sets proxy server.
-        /// </summary>
-        [OptionFlag("-p")]
-        public string Proxy { get; set; }
-
-        /// <summary>
-        /// HTTP Authentication username.
-        /// </summary>
-        [OptionFlag("--username")]
-        public string UserName { get; set; }
-
-        /// <summary>
-        /// HTTP Authentication password.
-        /// </summary>
-        [OptionFlag("--password")]
-        public string Password { get; set; }
-
-        /// <summary>
         /// Use this if you need another switches that are not currently supported by Rotativa.
         /// </summary>
         [OptionFlag("")]
@@ -146,8 +96,6 @@ namespace RotativaHQ.MVC5
 
         protected AsPdfResultBase()
         {
-            WkhtmltopdfPath = string.Empty;
-            FormsAuthenticationCookieName = ".ASPXAUTH";
             PageMargins = new Margins();
         }
 

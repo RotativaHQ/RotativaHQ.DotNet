@@ -238,6 +238,7 @@
     <Content Include="Views\Home\ScriptJs.cshtml" />
     <Content Include="Views\Home\InvalidCss.cshtml" />
     <Content Include="Views\Home\LongImagePath.cshtml" />
+    <Content Include="Views\Home\WrongSrc.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
