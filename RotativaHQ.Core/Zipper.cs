@@ -26,7 +26,7 @@ namespace RotativaHQ.Core
             return false;
         }
 
-        private static string ReturnLocalPath(string url)
+        public static string ReturnLocalPath(string url)
         {
             //if (DetectBundle(url))
             //    return string.Empty;
@@ -46,7 +46,7 @@ namespace RotativaHQ.Core
 
         // TODO: refactor please. Method says Add but in fact it also modifies the elements, 
         // not clear side effect
-        private static void AddSerializedAssets(
+        public static void AddSerializedAssets(
             this Dictionary<string, string> serialAssets, 
             IEnumerable<IElement> elements, 
             string uriAttribute
@@ -250,7 +250,7 @@ namespace RotativaHQ.Core
             }
         }
 
-        private static void AddBinaryAssetToArchive(
+        public static void AddBinaryAssetToArchive(
             this ZipArchive zipArchive, 
             string serialAssetName, 
             string serialAssetPath,

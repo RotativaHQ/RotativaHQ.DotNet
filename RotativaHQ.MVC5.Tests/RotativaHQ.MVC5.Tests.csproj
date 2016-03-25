@@ -106,9 +106,11 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CompressTests.cs" />
+    <Compile Include="PackageBuilderTests.cs" />
     <Compile Include="PDFParser.cs" />
     <Compile Include="PdfTester.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="RhqPackageBuilderTests.cs" />
     <Compile Include="SimpleTest.cs" />
   </ItemGroup>
   <ItemGroup>

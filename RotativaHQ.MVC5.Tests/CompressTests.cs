@@ -11,7 +11,7 @@ using Xunit;
 
 namespace RotativaHQ.MVC5.Tests
 {
-    [Trait("RotativaHQ", "preparing zip file with html content")]
+    [Trait("Packaging", "preparing zip file with html content")]
     public class CompressTests
     {
         [Fact(DisplayName="should contain zipped html")]
@@ -109,7 +109,7 @@ namespace RotativaHQ.MVC5.Tests
 
     }
 
-    [Trait("RotativaHQ", "zip file with duplicate asset reference")]
+    [Trait("Packaging", "zip file with duplicate asset reference")]
     public class CompressDuplicateTests
     {
         [Fact(DisplayName="should package just one instance of asset")]

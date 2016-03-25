@@ -49,7 +49,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="IMapPathResolver.cs" />
+    <Compile Include="PackageBuilder.cs" />
     <Compile Include="PdfRequestPayload.cs" />
+    <Compile Include="RhqPackageBuilder.cs" />
     <Compile Include="Zipper.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
