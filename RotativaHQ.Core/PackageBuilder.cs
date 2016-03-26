@@ -153,39 +153,75 @@ namespace RotativaHQ.Core
             }
         }
 
+        public void AddBinaryAssetsContents(List<AssetContent> currentContents, List<Asset> assets, string pagePath)
+        {
+            foreach (var asset in assets)
+            {
+            	try
+            	{
+            	    var assetContent = GetBinaryAsset(
+            	        asset.Uri, this.mapPathResolver, this.webRoot, pagePath);
+                    if (assetContent.Length > 0 && !currentContents.Any(a => a.Uri == asset.Uri))
+            	    {
+                        currentContents.Add(new AssetContent
+            	        {
+            	            Uri = asset.Uri,
+            	            NewUri = asset.NewUri,
+            	            Suffix = asset.Suffix,
+            	            Content = assetContent
+            	        });
+            	    }
+            	}
+            	catch (Exception ex)
+            	{
+            	    // TODO: trace somewhere
+            	}
+            }
+        }
+
         public List<AssetContent> GetAssetsContents(string html, string pagePath, string htmlName)
         {
             var assetsContents = new List<AssetContent>();
             var htmlAssets = GetHtmlAssets(html);
-            foreach (var asset in htmlAssets.Where(a => a.Suffix != "css"))
+            var nonCssAssets = htmlAssets.Where(a => a.Suffix != "css").ToList();
+            AddBinaryAssetsContents(assetsContents, nonCssAssets, pagePath);
+            
+            foreach (var asset in htmlAssets.Where(a => a.Suffix == "css"))
             {
                 try
                 {
-                    var assetContent = GetBinaryAsset(
-                        asset.Uri, this.mapPathResolver, this.webRoot, pagePath);
-                    if (!assetsContents.Any(a => a.Uri == asset.Uri))
+                    var cssStringContent = GetStringAsset(asset.Uri, mapPathResolver, webRoot, asset.Uri);
+                    if (!string.IsNullOrEmpty(cssStringContent))
                     {
-                        assetsContents.Add(new AssetContent
+                        var cssAssets = GetCssAssets(cssStringContent);
+                        AddBinaryAssetsContents(assetsContents, cssAssets, asset.Uri);
+                        foreach (var assetContent in assetsContents)
                         {
-                            Uri = asset.Uri,
-                            NewUri = asset.NewUri,
-                            Suffix = asset.Suffix,
-                            Content = assetContent
-                        });
-                        // TODO: use regex to avoid replace uri that is not link but text
-                        
+                            // TODO: use regex to avoid replace uri that is not link but text
+                            cssStringContent = cssStringContent.Replace(assetContent.Uri, assetContent.NewUri + "." + assetContent.Suffix);
+                        }
+                        var cssassetContent = Encoding.UTF8.GetBytes(cssStringContent);
+                        if (!assetsContents.Any(a => a.Uri == asset.Uri))
+                        {
+                            assetsContents.Add(new AssetContent
+                            {
+                                Uri = asset.Uri,
+                                NewUri = asset.NewUri,
+                                Suffix = asset.Suffix,
+                                Content = cssassetContent
+                            });
+                        }
                     }
                 }
                 catch (Exception ex)
-                {
-                    // TODO: trace somewhere
-                }
-            }
+                { /* TODO: Trace somewhere */ }
 
+            }
             // finally add index html
             foreach (var assetContent in assetsContents)
             {
-                html.Replace(assetContent.Uri, assetContent.NewUri + "." + assetContent.Suffix);
+                // TODO: use regex to avoid replace uri that is not link but text
+                html = html.ToLowerInvariant().Replace(assetContent.Uri, assetContent.NewUri + "." + assetContent.Suffix);
             }
             var htmlContent = Encoding.UTF8.GetBytes(html);
             assetsContents.Add(new AssetContent
@@ -196,6 +232,37 @@ namespace RotativaHQ.Core
                 Content = htmlContent
             });
             return assetsContents;
+        }
+
+        public static string GetStringAsset(string path, IMapPathResolver mapPathResolver, string webRoot, string pagePath)
+        {
+            var stringContent = string.Empty;
+            try
+            {
+                var localpath = mapPathResolver.MapPath(pagePath, path);
+                if (File.Exists(localpath))
+                {
+                    stringContent = File.ReadAllText(localpath);
+                }
+            }
+            catch (Exception ex)
+            { /* TODO: Trace something */ }
+            if (stringContent == string.Empty)
+            {
+                using (var webClient = new WebClient())
+                {
+                    try
+                    {
+                        stringContent = webClient.DownloadString(webRoot + path);
+                    }
+                    catch (WebException wex)
+                    {
+                        // TODO: log web exception
+                    }
+                }
+            }
+            
+            return stringContent;
         }
 
         public static byte[] GetBinaryAsset(string path, IMapPathResolver mapPathResolver, string webRoot, string pagePath)
@@ -230,5 +297,26 @@ namespace RotativaHQ.Core
             return content;
         }
 
+        public byte[] GetPackage(List<AssetContent> assetsContents)
+        {
+            using (var ms = new MemoryStream())
+            {
+                using (var zipArchive = new ZipArchive(ms, ZipArchiveMode.Create, true))
+                {
+                    foreach (var assetContent in assetsContents)
+                    {
+                        if (assetContent.Content.Length > 0)
+                        {
+                            var nentry = zipArchive.CreateEntry(assetContent.NewUri + "." + assetContent.Suffix, CompressionLevel.Fastest);
+                            using (var writer = new BinaryWriter(nentry.Open()))
+                            {
+                                writer.Write(assetContent.Content);
+                            }
+                        }
+                    }
+                }
+                return ms.ToArray();
+            }
+        }
     }
 }

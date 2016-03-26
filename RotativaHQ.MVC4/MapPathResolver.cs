@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Web;
+using System.Web.Mvc;
 
 namespace RotativaHQ.MVC4
 {
@@ -19,6 +20,9 @@ namespace RotativaHQ.MVC4
             }
             else
             {
+                // not sure this really works, 
+                // let's say we support only absolute local uri,
+                // so only the one starting with /
                 startPath = startPath.Remove(startPath.LastIndexOf('/') + 1);
                 localPath = HttpContext.Current.Server.MapPath(startPath + virtualPath);
             }
