@@ -100,7 +100,7 @@ namespace RotativaHQ.MVC5.Tests
         [Fact(DisplayName="should return assets with content")]
         public void FillAll()
         {
-            var html = @"<html><head><link href=""/Content/Site.css"" rel=""stylesheet"" /></head><body>Hello <img src=""Content/test.png"" />
+            var html = @"<html><head><link href=""/Content/Site.css"" rel=""stylesheet"" /></head><body>Hello <img src=""../Content/test.png"" />
                             <img src=""//Content/test.png"" /></body></html>";
 
             List<AssetContent> assets = PackageBuilder.GetAssetsContents(html, PagePath, "index");
@@ -120,13 +120,17 @@ namespace RotativaHQ.MVC5.Tests
 
             List<AssetContent> assets = PackageBuilder.GetAssetsContents(html, PagePath, "index");
             var archive = PackageBuilder.GetPackage(assets);
+            //var oldArchive = Zipper.ZipPage(html, MapPathResolver, RootPath, PagePath);
 
             Assert.Equal(4, assets.Count);
             var fileStream = new MemoryStream(archive);
+            //var fileStream2 = new MemoryStream(oldArchive);
             //fileStream.Position = 0;
             using (var zip = new ZipArchive(fileStream, ZipArchiveMode.Read))
+            //using (var zip2 = new ZipArchive(fileStream2, ZipArchiveMode.Read))
             {
                 Assert.Equal(4, zip.Entries.Count);
+                //Assert.Equal(zip.Entries.Count, zip2.Entries.Count);
                 foreach (var entry in zip.Entries)
                 {
                     using (var stream = entry.Open())
@@ -141,6 +145,12 @@ namespace RotativaHQ.MVC5.Tests
                             Assert.NotEqual("/Content/test.png", doc.Images[0].Attributes["src"].Value);
                             //Assert.Equal(html, myStr);
                         }
+                        if (entry.Name.ToLower().EndsWith("css"))
+                        {
+                            var myStrCss = sr.ReadToEnd();
+                            Assert.Contains("background-image", myStrCss);
+                            //Assert.Equal(html, myStr);
+                        }
                     }
                 }
             }
@@ -151,22 +161,25 @@ namespace RotativaHQ.MVC5.Tests
     {
         protected PackageBuilder PackageBuilder { get; set; }
         protected string PagePath { get; set; }
+        protected IMapPathResolver MapPathResolver { get; set; }
+
+        protected string RootPath { get; set; }
 
         public BasePackageTest()
         {
-            string rootpath = AppDomain.CurrentDomain.BaseDirectory;
+            RootPath = AppDomain.CurrentDomain.BaseDirectory;
             PagePath = "Home/Simple";
             var mockPathResolver = new Mock<IMapPathResolver>();
-            mockPathResolver.Setup(x => x.MapPath(PagePath, "Content/test.png"))
-                .Returns(Path.Combine(rootpath, "Content", "test.png"));
-            mockPathResolver.Setup(x => x.MapPath(PagePath, "/Content/test.png"))
-                .Returns(Path.Combine(rootpath, "Content", "test.png"));
-            mockPathResolver.Setup(x => x.MapPath(PagePath, "/Content/Site.css"))
-                .Returns(Path.Combine(rootpath, "Content", "Site.css"));
-            mockPathResolver.Setup(x => x.MapPath("/Content/Site.css", "/Content/cheap_diagonal_fabric.png"))
-                .Returns(Path.Combine(rootpath, "Content", "cheap_diagonal_fabric.png"));
-
-            PackageBuilder = new PackageBuilder(mockPathResolver.Object, rootpath);
+            mockPathResolver.Setup(x => x.MapPath(PagePath, "../content/test.png"))
+                .Returns(Path.Combine(RootPath, "Content", "test.png"));
+            mockPathResolver.Setup(x => x.MapPath(PagePath, "/content/test.png"))
+                .Returns(Path.Combine(RootPath, "Content", "test.png"));
+            mockPathResolver.Setup(x => x.MapPath(PagePath, "/content/site.css"))
+                .Returns(Path.Combine(RootPath, "Content", "Site.css"));
+            mockPathResolver.Setup(x => x.MapPath("/content/site.css", "/content/cheap_diagonal_fabric.png"))
+                .Returns(Path.Combine(RootPath, "Content", "cheap_diagonal_fabric.png"));
+            MapPathResolver = mockPathResolver.Object;
+            PackageBuilder = new PackageBuilder(mockPathResolver.Object, RootPath);
 
         }
     }

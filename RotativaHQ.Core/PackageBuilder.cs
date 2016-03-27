@@ -29,6 +29,7 @@ namespace RotativaHQ.Core
         IMapPathResolver mapPathResolver;
         string htmlPage;
         string webRoot;
+        public List<AssetContent> AssetsContents { get; set; }
         //MemoryStream ms;
         //ZipArchive zipArchive;
 
@@ -36,9 +37,11 @@ namespace RotativaHQ.Core
         {
             this.mapPathResolver = mapPathResolver;
             this.webRoot = webRoot;
+            AssetsContents = new List<AssetContent>();
             //ms = new MemoryStream();
             //zipArchive = new ZipArchive(ms, ZipArchiveMode.Create, true);
         }
+
         public List<Asset> GetHtmlAssets(string html)
         {
             var assets = new List<Asset>();
@@ -234,6 +237,12 @@ namespace RotativaHQ.Core
             return assetsContents;
         }
 
+        public void AddHtmlToPackage(string html, string pagePath, string htmlName)
+        {
+            var assets = GetAssetsContents(html, pagePath, htmlName);
+            AssetsContents.AddRange(assets);
+        }
+
         public static string GetStringAsset(string path, IMapPathResolver mapPathResolver, string webRoot, string pagePath)
         {
             var stringContent = string.Empty;
@@ -295,6 +304,12 @@ namespace RotativaHQ.Core
                 }
             }
             return content;
+        }
+        
+        public byte[] GetPackage()
+        {
+            var package = GetPackage(AssetsContents);
+            return package;
         }
 
         public byte[] GetPackage(List<AssetContent> assetsContents)

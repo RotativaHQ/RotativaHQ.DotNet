@@ -58,5 +58,13 @@ namespace RotativaHq.MVC5.DemoSite.Controllers
             return new ViewAsPdf();
             //return View();
         }
+
+        public ActionResult HeaderTest()
+        {
+            return new ViewAsPdf() 
+            {
+                HeaderView = "HeaderTestHeader"
+            };
+        }
     }
 }

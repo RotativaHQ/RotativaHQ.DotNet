@@ -28,6 +28,9 @@ namespace RotativaHQ.MVC5
             set { _masterName = value; }
         }
 
+        public string HeaderView { get; set; }
+        public string FooterView { get; set; }
+
         public object Model { get; set; }
 
         public ViewAsPdf()
@@ -64,7 +67,7 @@ namespace RotativaHQ.MVC5
 
         protected virtual ViewEngineResult GetView(ControllerContext context, string viewName, string masterName)
         {
-            return ViewEngines.Engines.FindView(context, ViewName, MasterName);
+            return ViewEngines.Engines.FindView(context, viewName, masterName);
         }
 
         protected override string CallTheDriver(ControllerContext context)
@@ -74,6 +77,9 @@ namespace RotativaHQ.MVC5
             // use action name if the view name was not provided
             if (string.IsNullOrEmpty(ViewName))
                 ViewName = context.RouteData.GetRequiredString("action");
+            StringBuilder html = new StringBuilder();
+            StringBuilder header = new StringBuilder();
+            StringBuilder footer = new StringBuilder();
 
             using (var sw = new StringWriter())
             {
@@ -96,14 +102,29 @@ namespace RotativaHQ.MVC5
                 var viewContext = new ViewContext(context, viewResult.View, context.Controller.ViewData, context.Controller.TempData, sw);
                 viewResult.View.Render(viewContext, sw);
 
-                StringBuilder html = sw.GetStringBuilder();
-
-                // replace href and src attributes with full URLs
-                var apiKey = ConfigurationManager.AppSettings["RotativaKey"].ToString();
-                var client = new RotativaHqClient(apiKey);
-                var fileUrl = client.GetPdfUrl(GetConvertOptions(), html.ToString(), this.FileName);
-                return fileUrl;
+                html = sw.GetStringBuilder();
             }
+
+            if (!string.IsNullOrEmpty(HeaderView))
+            {
+                using (var hw = new StringWriter())
+                {
+                    ViewEngineResult headerViewResult = GetView(context, HeaderView, MasterName);
+                    if (headerViewResult != null)
+                    {
+                        var viewContext = new ViewContext(context, headerViewResult.View, context.Controller.ViewData, context.Controller.TempData, hw);
+                        headerViewResult.View.Render(viewContext, hw);
+
+                		header = hw.GetStringBuilder();
+                        ExtraSwitches += " --header-html header.html";
+                    }
+                }
+            }
+            // replace href and src attributes with full URLs
+            var apiKey = ConfigurationManager.AppSettings["RotativaKey"].ToString();
+            var client = new RotativaHqClient(apiKey);
+            var fileUrl = client.GetPdfUrl(GetConvertOptions(), html.ToString(), this.FileName, header.ToString(), footer.ToString());
+            return fileUrl;
         }
     }
 }

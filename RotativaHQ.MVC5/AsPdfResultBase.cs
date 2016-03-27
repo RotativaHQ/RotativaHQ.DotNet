@@ -94,6 +94,8 @@ namespace RotativaHQ.MVC5
         [OptionFlag("")]
         public string CustomSwitches { get; set; }
 
+        protected virtual string ExtraSwitches { get; set; }
+
         protected AsPdfResultBase()
         {
             PageMargins = new Margins();
@@ -140,7 +142,12 @@ namespace RotativaHQ.MVC5
                 }
             }
 
-            return result.ToString().Trim();
+            var switches = result.ToString().Trim();
+            if (!string.IsNullOrEmpty(ExtraSwitches))
+            {
+                switches += ExtraSwitches;
+            }
+            return switches;
         }
 
         private string GetWkParams(ControllerContext context)
@@ -148,6 +155,11 @@ namespace RotativaHQ.MVC5
             var switches = string.Empty;
 
             switches += " " + GetConvertOptions();
+            
+            if (!string.IsNullOrEmpty(ExtraSwitches))
+            {
+                switches += ExtraSwitches;
+            }
 
             return switches;
         }

@@ -27,7 +27,7 @@ namespace RotativaHQ.MVC5
             this.apiKey = apiKey;
         }
 
-        public string GetPdfUrl(string switches, string html, string fileName = "")
+        public string GetPdfUrl(string switches, string html, string fileName = "", string header = "", string footer = "")
         {
             var httpClient = new HttpClient();
             using (
@@ -41,7 +41,13 @@ namespace RotativaHQ.MVC5
         			  ? string.Empty : ":" + context.Request.Url.Port);
                 webRoot = webRoot.TrimEnd('/');
                 var requestPath = context.Request.Path;
-                byte[] zippedHtml = Zipper.ZipPage(html, new MapPathResolver(), webRoot, requestPath);
+                var packageBuilder = new PackageBuilder(new MapPathResolver(), webRoot);
+                packageBuilder.AddHtmlToPackage(html, requestPath, "index");
+                if (!string.IsNullOrEmpty(header))
+                {
+                    packageBuilder.AddHtmlToPackage(header, requestPath, "header");
+                }
+                var zippedHtml = packageBuilder.GetPackage();
                 var payload = new PdfRequestPayload{
                     Id = Guid.NewGuid(),
                     Filename = fileName,

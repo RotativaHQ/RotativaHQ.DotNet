@@ -239,6 +239,8 @@
     <Content Include="Views\Home\InvalidCss.cshtml" />
     <Content Include="Views\Home\LongImagePath.cshtml" />
     <Content Include="Views\Home\WrongSrc.cshtml" />
+    <Content Include="Views\Home\HeaderTest.cshtml" />
+    <Content Include="Views\Home\HeaderTestHeader.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
