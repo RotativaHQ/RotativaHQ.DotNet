@@ -29,56 +29,99 @@ namespace RotativaHQ.MVC5
 
         public string GetPdfUrl(string switches, string html, string fileName = "", string header = "", string footer = "")
         {
-            var httpClient = new HttpClient();
-            using (
-                var request = CreateRequest("/", "application/json", HttpMethod.Post))
+            var context = HttpContext.Current;
+            var webRoot = string.Format("{0}://{1}{2}",
+                context.Request.Url.Scheme,
+        		context.Request.Url.Host,
+        		context.Request.Url.Port == 80
+        		  ? string.Empty : ":" + context.Request.Url.Port);
+            webRoot = webRoot.TrimEnd('/');
+            var requestPath = context.Request.Path;
+            var packageBuilder = new PackageBuilder(new MapPathResolver(), webRoot);
+            packageBuilder.AddHtmlToPackage(html, requestPath, "index");
+            if (!string.IsNullOrEmpty(header))
             {
-                var context = HttpContext.Current;
-                var webRoot = string.Format("{0}://{1}{2}",
-                    context.Request.Url.Scheme,
-        			context.Request.Url.Host,
-        			context.Request.Url.Port == 80
-        			  ? string.Empty : ":" + context.Request.Url.Port);
-                webRoot = webRoot.TrimEnd('/');
-                var requestPath = context.Request.Path;
-                var packageBuilder = new PackageBuilder(new MapPathResolver(), webRoot);
-                packageBuilder.AddHtmlToPackage(html, requestPath, "index");
-                if (!string.IsNullOrEmpty(header))
-                {
-                    packageBuilder.AddHtmlToPackage(header, requestPath, "header");
-                }
-                var zippedHtml = packageBuilder.GetPackage();
-                var payload = new PdfRequestPayload{
-                    Id = Guid.NewGuid(),
-                    Filename = fileName,
-                    Switches = switches,
-                    ZippedHtmlPage = zippedHtml
-                };
-                
-                using (MemoryStream ms = new MemoryStream())
-                {
-                    var sw = new StreamWriter(ms, new UnicodeEncoding());
-                    Serializer.Serialize(ms, payload);
-                    ms.Position = 0;
-                    HttpContent content = new StreamContent(ms);
-                    request.Content = content;
+                packageBuilder.AddHtmlToPackage(header, requestPath, "header");
+            }
+            if (!string.IsNullOrEmpty(footer))
+            {
+                packageBuilder.AddHtmlToPackage(footer, requestPath, "footer");
+            }
+            var assets = packageBuilder.AssetsContents
+                .Select(a => new KeyValuePair<string, byte[]>(
+                    a.NewUri + "." + a.Suffix, a.Content))
+                .ToDictionary(x => x.Key, x => x.Value);
+            var payload = new PdfRequestPayloadV2
+            {
+                Id = Guid.NewGuid(),
+                Filename = fileName,
+                Switches = switches,
+                HtmlAssets = assets
+            };
+            string gzipIt = ConfigurationManager.AppSettings["RotativaGZip"];
+            if (gzipIt == null || gzipIt == "1")
+            {
+                var httpClient = new HttpClient(new GzipCompressingHandler(new HttpClientHandler()));
+            	using (
+            	    var request = CreateRequest("/v2", "application/json", HttpMethod.Post))
+            	{
+            	    using (MemoryStream ms = new MemoryStream())
+            	    {
+            	        var sw = new StreamWriter(ms);//, new UnicodeEncoding());
+            	        Serializer.Serialize(ms, payload);
+            	        ms.Position = 0;
+            	        HttpContent content = new StreamContent(ms);
+                        request.Content = content; // new GzipContent(content);
+            	        using (
+            	            HttpResponseMessage response =
+            	                httpClient.SendAsync(request, new CancellationTokenSource().Token).Result)
+            	        {
+            	            var httpResponseMessage = response;
+            	            var result = response.Content.ReadAsStringAsync();
+            	            var jsonReponse = JObject.Parse(result.Result);
+            	            if (response.StatusCode == HttpStatusCode.Unauthorized)
+            	            {
+            	                var error = jsonReponse["error"].Value<string>();
+            	                throw new UnauthorizedAccessException(error);
+            	            }
+            	            var pdfUrl = jsonReponse["pdfUrl"].Value<string>(); // 
+            	            return pdfUrl;
+            	        }
+            	    }
+            	}
+            }
+            else
+            {
+                var httpClient = new HttpClient();
+            	using (
+            	    var request = CreateRequest("/v2", "application/json", HttpMethod.Post))
+            	{
+            	    using (MemoryStream ms = new MemoryStream())
+            	    {
+            	        var sw = new StreamWriter(ms, new UnicodeEncoding());
+            	        Serializer.Serialize(ms, payload);
+            	        ms.Position = 0;
+            	        HttpContent content = new StreamContent(ms);
+            	        request.Content = content;
 
-                    using (
-                        HttpResponseMessage response =
-                            httpClient.SendAsync(request, new CancellationTokenSource().Token).Result)
-                    {
-                        var httpResponseMessage = response;
-                        var result = response.Content.ReadAsStringAsync();
-                        var jsonReponse = JObject.Parse(result.Result);
-                        if (response.StatusCode == HttpStatusCode.Unauthorized)
-                        {
-                            var error = jsonReponse["error"].Value<string>();
-                            throw new UnauthorizedAccessException(error);
-                        }
-                        var pdfUrl = jsonReponse["pdfUrl"].Value<string>(); // 
-                        return pdfUrl;
-                    }
-                }
+            	        using (
+            	            HttpResponseMessage response =
+            	                httpClient.SendAsync(request, new CancellationTokenSource().Token).Result)
+            	        {
+            	            var httpResponseMessage = response;
+            	            var result = response.Content.ReadAsStringAsync();
+            	            var jsonReponse = JObject.Parse(result.Result);
+            	            if (response.StatusCode == HttpStatusCode.Unauthorized)
+            	            {
+            	                var error = jsonReponse["error"].Value<string>();
+            	                throw new UnauthorizedAccessException(error);
+            	            }
+            	            var pdfUrl = jsonReponse["pdfUrl"].Value<string>(); // 
+            	            return pdfUrl;
+            	        }
+            	    }
+            	}
+
             }
         }
 

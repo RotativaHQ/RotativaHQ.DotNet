@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 namespace RotativaHQ.Core
 {
     [ProtoContract]
-    public class PdfRequestPayload
+    public class PdfRequestPayloadV2
     {
         [ProtoMember(1)]
         public Guid Id { get; set; }
@@ -20,6 +20,6 @@ namespace RotativaHQ.Core
         public string Switches { get; set; }
 
         [ProtoMember(4)]
-        public byte[] ZippedHtmlPage { get; set; }
+        public Dictionary<string, byte[]> HtmlAssets { get; set; }
     }
 }

@@ -120,6 +120,22 @@ namespace RotativaHQ.MVC5
                     }
                 }
             }
+
+            if (!string.IsNullOrEmpty(FooterView))
+            {
+                using (var hw = new StringWriter())
+                {
+                    ViewEngineResult footerViewResult = GetView(context, FooterView, MasterName);
+                    if (footerViewResult != null)
+                    {
+                        var viewContext = new ViewContext(context, footerViewResult.View, context.Controller.ViewData, context.Controller.TempData, hw);
+                        footerViewResult.View.Render(viewContext, hw);
+
+                		footer = hw.GetStringBuilder();
+                        ExtraSwitches += " --footer-html footer.html";
+                    }
+                }
+            }
             // replace href and src attributes with full URLs
             var apiKey = ConfigurationManager.AppSettings["RotativaKey"].ToString();
             var client = new RotativaHqClient(apiKey);

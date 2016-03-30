@@ -78,6 +78,16 @@ namespace RotativaHQ.MVC5.Tests
         }
     }
 
+    [Trait("RotativaHQ", "calling a simple page with header")]
+    public class SimplePagedTest : BaseWebClientTest
+    {
+        [Fact(DisplayName = "should return the link to paged pdf")]
+        public async Task ValidPdf()
+        {
+            await VerifyPdfForAction("/Home/HeaderTest", "page 1 of 1");
+        }
+    }
+
     [Trait("RotativaHQ", "calling a page with invalid css url")]
     public class InvalidCssTest: BaseWebClientTest
     {

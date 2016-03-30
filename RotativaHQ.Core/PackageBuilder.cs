@@ -1,4 +1,5 @@
-﻿using System;
+﻿using AngleSharp.Dom.Html;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
@@ -42,11 +43,9 @@ namespace RotativaHQ.Core
             //zipArchive = new ZipArchive(ms, ZipArchiveMode.Create, true);
         }
 
-        public List<Asset> GetHtmlAssets(string html)
+        public List<Asset> GetHtmlAssets(IHtmlDocument doc)
         {
             var assets = new List<Asset>();
-            var parser = new AngleSharp.Parser.Html.HtmlParser();
-            var doc = parser.Parse(html.ToLowerInvariant());
             var images = doc.Images
                 .Where(x => x.HasAttribute("src"));
             var styles = doc.GetElementsByTagName("link")
@@ -102,6 +101,16 @@ namespace RotativaHQ.Core
                 }
             }
 
+            return assets;
+
+        }
+
+        public List<Asset> GetHtmlAssets(string html)
+        {
+            var assets = new List<Asset>();
+            var parser = new AngleSharp.Parser.Html.HtmlParser();
+            var doc = parser.Parse(html.ToLowerInvariant());
+            assets = GetHtmlAssets(doc);
             return assets;
         }
 
@@ -185,7 +194,10 @@ namespace RotativaHQ.Core
         public List<AssetContent> GetAssetsContents(string html, string pagePath, string htmlName)
         {
             var assetsContents = new List<AssetContent>();
-            var htmlAssets = GetHtmlAssets(html);
+            var parser = new AngleSharp.Parser.Html.HtmlParser();
+            var doc = parser.Parse(html.ToLowerInvariant());
+
+            var htmlAssets = GetHtmlAssets(doc);
             var nonCssAssets = htmlAssets.Where(a => a.Suffix != "css").ToList();
             AddBinaryAssetsContents(assetsContents, nonCssAssets, pagePath);
             
@@ -226,6 +238,7 @@ namespace RotativaHQ.Core
                 // TODO: use regex to avoid replace uri that is not link but text
                 html = html.ToLowerInvariant().Replace(assetContent.Uri, assetContent.NewUri + "." + assetContent.Suffix);
             }
+            html = "<!DOCTYPE html>" + html;
             var htmlContent = Encoding.UTF8.GetBytes(html);
             assetsContents.Add(new AssetContent
             {   

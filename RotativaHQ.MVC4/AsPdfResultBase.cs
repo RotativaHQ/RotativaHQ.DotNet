@@ -22,26 +22,6 @@ namespace RotativaHQ.MVC4
         public string FileName { get; set; }
 
         /// <summary>
-        /// Path to wkhtmltopdf binary.
-        /// </summary>
-        public string WkhtmltopdfPath { get; set; }
-
-        /// <summary>
-        /// Custom name of authentication cookie used by forms authentication.
-        /// </summary>
-        [Obsolete("Use FormsAuthenticationCookieName instead of CookieName.")]
-        public string CookieName
-        {
-            get { return FormsAuthenticationCookieName; }
-            set { FormsAuthenticationCookieName = value; }
-        }
-
-        /// <summary>
-        /// Custom name of authentication cookie used by forms authentication.
-        /// </summary>
-        public string FormsAuthenticationCookieName { get; set; }
-
-        /// <summary>
         /// Sets the page margins.
         /// </summary>
         public Margins PageMargins { get; set; }
@@ -71,18 +51,6 @@ namespace RotativaHQ.MVC4
         /// </summary>
         [OptionFlag("-O")]
         public Orientation? PageOrientation { get; set; }
-
-        /// <summary>
-        /// Sets cookies.
-        /// </summary>
-        [OptionFlag("--cookie")]
-        public Dictionary<string, string> Cookies { get; set; }
-
-        /// <summary>
-        /// Sets post values.
-        /// </summary>
-        [OptionFlag("--post")]
-        public Dictionary<string, string> Post { get; set; }
 
         /// <summary>
         /// Indicates whether the page can run JavaScript.
@@ -121,40 +89,17 @@ namespace RotativaHQ.MVC4
         public bool IsGrayScale { get; set; }
 
         /// <summary>
-        /// Sets proxy server.
-        /// </summary>
-        [OptionFlag("-p")]
-        public string Proxy { get; set; }
-
-        /// <summary>
-        /// HTTP Authentication username.
-        /// </summary>
-        [OptionFlag("--username")]
-        public string UserName { get; set; }
-
-        /// <summary>
-        /// HTTP Authentication password.
-        /// </summary>
-        [OptionFlag("--password")]
-        public string Password { get; set; }
-
-        /// <summary>
         /// Use this if you need another switches that are not currently supported by Rotativa.
         /// </summary>
         [OptionFlag("")]
         public string CustomSwitches { get; set; }
 
-        [Obsolete(@"Use BuildPdf(this.ControllerContext) method instead and use the resulting binary data to do what needed.")]
-        public string SaveOnServerPath { get; set; }
+        protected virtual string ExtraSwitches { get; set; }
 
         protected AsPdfResultBase()
         {
-            WkhtmltopdfPath = string.Empty;
-            FormsAuthenticationCookieName = ".ASPXAUTH";
             PageMargins = new Margins();
         }
-
-        protected abstract string GetUrl(ControllerContext context);
 
         /// <summary>
         /// Returns properties with OptionFlag attribute as one line that can be passed to wkhtmltopdf binary.
@@ -197,41 +142,30 @@ namespace RotativaHQ.MVC4
                 }
             }
 
-            return result.ToString().Trim();
+            var switches = result.ToString().Trim();
+            if (!string.IsNullOrEmpty(ExtraSwitches))
+            {
+                switches += ExtraSwitches;
+            }
+            return switches;
         }
 
         private string GetWkParams(ControllerContext context)
         {
             var switches = string.Empty;
 
-            HttpCookie authenticationCookie = null;
-            if (context.HttpContext.Request.Cookies != null && context.HttpContext.Request.Cookies.AllKeys.Contains(FormsAuthentication.FormsCookieName))
-            {
-                authenticationCookie = context.HttpContext.Request.Cookies[FormsAuthentication.FormsCookieName];
-            }
-            if (authenticationCookie != null)
-            {
-                var authCookieValue = authenticationCookie.Value;
-                switches += " --cookie " + FormsAuthenticationCookieName + " " + authCookieValue;
-            }
-
             switches += " " + GetConvertOptions();
 
-            var url = GetUrl(context);
-            switches += " " + url;
+            if (!string.IsNullOrEmpty(ExtraSwitches))
+            {
+                switches += ExtraSwitches;
+            }
 
             return switches;
         }
 
-
-
         public string BuildPdf(ControllerContext context)
         {
-            if (context == null)
-                throw new ArgumentNullException("context");
-
-            if (WkhtmltopdfPath == string.Empty)
-                WkhtmltopdfPath = HttpContext.Current.Server.MapPath("~/Rotativa");
 
             var fileContent = CallTheDriver(context);
 

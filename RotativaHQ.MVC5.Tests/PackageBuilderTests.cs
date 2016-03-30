@@ -157,6 +157,56 @@ namespace RotativaHQ.MVC5.Tests
         }
     }
 
+
+    [Trait("PackageBuilder", "getting the zip archive with footer")]
+    public class ZippingFooter : BasePackageTest
+    {
+        [Fact(DisplayName = "should return assets with content")]
+        public void FillAll()
+        {
+            var html = @"<html><head><link href=""/Content/Site.css"" rel=""stylesheet"" /></head><body>Hello</body></html>";
+
+            var footer = @"<html><head></head><body>Hello <img src=""/Content/test.png"" />
+                            </body></html>";
+            List<AssetContent> assets = PackageBuilder.GetAssetsContents(html, PagePath, "index");
+            var archive = PackageBuilder.GetPackage(assets);
+            //var oldArchive = Zipper.ZipPage(html, MapPathResolver, RootPath, PagePath);
+
+            Assert.Equal(4, assets.Count);
+            var fileStream = new MemoryStream(archive);
+            //var fileStream2 = new MemoryStream(oldArchive);
+            //fileStream.Position = 0;
+            using (var zip = new ZipArchive(fileStream, ZipArchiveMode.Read))
+            //using (var zip2 = new ZipArchive(fileStream2, ZipArchiveMode.Read))
+            {
+                Assert.Equal(4, zip.Entries.Count);
+                //Assert.Equal(zip.Entries.Count, zip2.Entries.Count);
+                foreach (var entry in zip.Entries)
+                {
+                    using (var stream = entry.Open())
+                    {
+                        var sr = new StreamReader(stream);
+                        if (entry.Name.ToLower() == "index.html")
+                        {
+                            var myStr = sr.ReadToEnd();
+                            var parser = new AngleSharp.Parser.Html.HtmlParser();
+                            var doc = parser.Parse(myStr);
+                            Assert.Equal(2, doc.Images.Count());
+                            Assert.NotEqual("/Content/test.png", doc.Images[0].Attributes["src"].Value);
+                            //Assert.Equal(html, myStr);
+                        }
+                        if (entry.Name.ToLower().EndsWith("css"))
+                        {
+                            var myStrCss = sr.ReadToEnd();
+                            Assert.Contains("background-image", myStrCss);
+                            //Assert.Equal(html, myStr);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     public abstract class BasePackageTest
     {
         protected PackageBuilder PackageBuilder { get; set; }

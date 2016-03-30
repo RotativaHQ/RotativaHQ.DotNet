@@ -28,11 +28,17 @@ namespace RotativaHq.MVC5.DemoSite.Controllers
             return View();
         }
 
+        public ActionResult HeaderTestHeader()
+        {
+            return View();
+        }
+
         public ActionResult Simple()
         {
             ViewBag.SomeData = "Ciao";
             return new ViewAsPdf() { 
-                CustomSwitches = "-B 25 -L 20 -R 20 -T 22 -s A4 -O Portrait --print-media-type --header-spacing 3 --header-html http://koms.azurewebsites.net/pdf/Header?headerTitle=Quotation+EA020000%2f16 --footer-html http://koms.azurewebsites.net/pdf/Footer"
+                HeaderView = "HeaderTestHeader",
+                CustomSwitches = "-B 25 -L 20 -R 20 -T 22 -s A4 -O Portrait --print-media-type --header-spacing 3"
             };
             //return View();
         }
@@ -63,7 +69,9 @@ namespace RotativaHq.MVC5.DemoSite.Controllers
         {
             return new ViewAsPdf() 
             {
-                HeaderView = "HeaderTestHeader"
+                HeaderView = "HeaderTestHeader",
+                FooterView = "HeaderTestHeader",
+                CustomSwitches = ""
             };
         }
     }
