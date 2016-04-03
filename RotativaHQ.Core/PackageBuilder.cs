@@ -195,17 +195,17 @@ namespace RotativaHQ.Core
         {
             var assetsContents = new List<AssetContent>();
             var parser = new AngleSharp.Parser.Html.HtmlParser();
-            var doc = parser.Parse(html.ToLowerInvariant());
+            var doc = parser.Parse(html);
 
             var htmlAssets = GetHtmlAssets(doc);
-            var nonCssAssets = htmlAssets.Where(a => a.Suffix != "css").ToList();
+            var nonCssAssets = htmlAssets.Where(a => a.Suffix.ToLower() != "css").ToList();
             AddBinaryAssetsContents(assetsContents, nonCssAssets, pagePath);
             
-            foreach (var asset in htmlAssets.Where(a => a.Suffix == "css"))
+            foreach (var asset in htmlAssets.Where(a => a.Suffix.ToLower() == "css"))
             {
                 try
                 {
-                    var cssStringContent = GetStringAsset(asset.Uri, mapPathResolver, webRoot, asset.Uri);
+                    var cssStringContent = GetStringAsset(asset.Uri, mapPathResolver, webRoot, pagePath);
                     if (!string.IsNullOrEmpty(cssStringContent))
                     {
                         var cssAssets = GetCssAssets(cssStringContent);
@@ -236,7 +236,7 @@ namespace RotativaHQ.Core
             foreach (var assetContent in assetsContents)
             {
                 // TODO: use regex to avoid replace uri that is not link but text
-                html = html.ToLowerInvariant().Replace(assetContent.Uri, assetContent.NewUri + "." + assetContent.Suffix);
+                html = html.Replace(assetContent.Uri, assetContent.NewUri + "." + assetContent.Suffix);
             }
             html = "<!DOCTYPE html>" + html;
             var htmlContent = Encoding.UTF8.GetBytes(html);
@@ -275,7 +275,14 @@ namespace RotativaHQ.Core
                 {
                     try
                     {
-                        stringContent = webClient.DownloadString(webRoot + path);
+                        if (path.StartsWith("http") || path.StartsWith("//"))
+                        {
+                            stringContent = webClient.DownloadString(path);
+                        }
+                        else
+                        {
+                            stringContent = webClient.DownloadString(webRoot + path);
+                        }
                     }
                     catch (WebException wex)
                     {
@@ -308,7 +315,14 @@ namespace RotativaHQ.Core
                 {
                     try
                     {
-                        content = webClient.DownloadData(webRoot + path);
+                        if (path.StartsWith("http") || path.StartsWith("//"))
+                        {
+                            content = webClient.DownloadData(path);
+                        }
+                        else
+                        {
+                            content = webClient.DownloadData(webRoot + path);
+                        }
                     }
                     catch (Exception ex)
                     {

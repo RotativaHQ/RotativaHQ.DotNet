@@ -59,7 +59,11 @@ namespace RotativaHQ.MVC5
                 HtmlAssets = assets
             };
             string gzipIt = ConfigurationManager.AppSettings["RotativaGZip"];
-            if (gzipIt == null || gzipIt == "1")
+            if (HttpContext.Current != null && HttpContext.Current.Request.IsLocal && gzipIt == null)
+            {
+                gzipIt = "1";
+            }
+            if (gzipIt == "1")
             {
                 var httpClient = new HttpClient(new GzipCompressingHandler(new HttpClientHandler()));
             	using (

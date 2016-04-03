@@ -161,7 +161,7 @@ namespace RotativaHQ.MVC5.Tests
     [Trait("PackageBuilder", "getting the zip archive with footer")]
     public class ZippingFooter : BasePackageTest
     {
-        [Fact(DisplayName = "should return assets with content")]
+        [Fact(DisplayName = "should return assets with content", Skip="zip obsolete")]
         public void FillAll()
         {
             var html = @"<html><head><link href=""/Content/Site.css"" rel=""stylesheet"" /></head><body>Hello</body></html>";
@@ -172,14 +172,14 @@ namespace RotativaHQ.MVC5.Tests
             var archive = PackageBuilder.GetPackage(assets);
             //var oldArchive = Zipper.ZipPage(html, MapPathResolver, RootPath, PagePath);
 
-            Assert.Equal(4, assets.Count);
+            Assert.Equal(3, assets.Count);
             var fileStream = new MemoryStream(archive);
             //var fileStream2 = new MemoryStream(oldArchive);
             //fileStream.Position = 0;
             using (var zip = new ZipArchive(fileStream, ZipArchiveMode.Read))
             //using (var zip2 = new ZipArchive(fileStream2, ZipArchiveMode.Read))
             {
-                Assert.Equal(4, zip.Entries.Count);
+                Assert.Equal(3, zip.Entries.Count);
                 //Assert.Equal(zip.Entries.Count, zip2.Entries.Count);
                 foreach (var entry in zip.Entries)
                 {
@@ -220,13 +220,13 @@ namespace RotativaHQ.MVC5.Tests
             RootPath = AppDomain.CurrentDomain.BaseDirectory;
             PagePath = "Home/Simple";
             var mockPathResolver = new Mock<IMapPathResolver>();
-            mockPathResolver.Setup(x => x.MapPath(PagePath, "../content/test.png"))
+            mockPathResolver.Setup(x => x.MapPath(PagePath, "../Content/test.png"))
                 .Returns(Path.Combine(RootPath, "Content", "test.png"));
-            mockPathResolver.Setup(x => x.MapPath(PagePath, "/content/test.png"))
+            mockPathResolver.Setup(x => x.MapPath(PagePath, "/Content/test.png"))
                 .Returns(Path.Combine(RootPath, "Content", "test.png"));
-            mockPathResolver.Setup(x => x.MapPath(PagePath, "/content/site.css"))
+            mockPathResolver.Setup(x => x.MapPath(PagePath, "/Content/Site.css"))
                 .Returns(Path.Combine(RootPath, "Content", "Site.css"));
-            mockPathResolver.Setup(x => x.MapPath("/content/site.css", "/content/cheap_diagonal_fabric.png"))
+            mockPathResolver.Setup(x => x.MapPath("/Content/Site.css", "/Content/cheap_diagonal_fabric.png"))
                 .Returns(Path.Combine(RootPath, "Content", "cheap_diagonal_fabric.png"));
             MapPathResolver = mockPathResolver.Object;
             PackageBuilder = new PackageBuilder(mockPathResolver.Object, RootPath);
