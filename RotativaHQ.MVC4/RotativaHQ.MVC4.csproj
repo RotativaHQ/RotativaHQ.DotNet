@@ -85,6 +85,7 @@
     <Compile Include="MapPathResolver.cs" />
     <Compile Include="Margins.cs" />
     <Compile Include="Options.cs" />
+    <Compile Include="PdfHelper.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RotativaHqClient.cs" />
     <Compile Include="ViewAsPdf.cs" />

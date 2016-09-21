@@ -18,12 +18,12 @@ namespace RotativaHq.MVC5.DemoSite.Controllers
         {
             ViewBag.Message = "Your application description page.";
 
-            return new ViewAsPdf();
+            return new  ViewAsPdf();
         }
 
         public ActionResult Contact()
         {
-            ViewBag.Message = "Your contact page.";
+            ViewBag.Message = "Your application description page.";
 
             return View();
         }

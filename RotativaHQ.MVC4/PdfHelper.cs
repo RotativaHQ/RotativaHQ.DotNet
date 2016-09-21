@@ -10,7 +10,7 @@ using System.Web;
 using System.Web.Mvc;
 using System.Web.Routing;
 
-namespace RotativaHQ.MVC5
+namespace RotativaHQ.MVC4
 {
     public class DummyPdfController : Controller { }
 
