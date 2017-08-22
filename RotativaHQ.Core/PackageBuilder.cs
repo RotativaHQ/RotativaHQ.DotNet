@@ -53,6 +53,15 @@ namespace RotativaHQ.Core
                 .Where(c => c.HasAttribute("href"));
             var scripts = doc.GetElementsByTagName("script")
                 .Where(x => x.HasAttribute("src"));
+            var inlineStyles = doc.GetElementsByTagName("style");
+
+            //var cssparser = new AngleSharp.Parser.Css.CssParser();
+            //var f = cssparser.ParseStylesheet(inlineStyles[0].InnerHtml);
+            foreach (var inlineStyle in inlineStyles)
+            {
+                var inlineStyleAssets = GetCssAssets(inlineStyle.InnerHtml);
+                assets.AddRange(inlineStyleAssets);
+            }
 
             foreach (var image in images)
             {

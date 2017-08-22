@@ -25,6 +25,25 @@ namespace RotativaHQ.MVC5.Tests
             Assert.Equal("png", assets.First().Suffix);
         }
     }
+    [Trait("PackageBuilder", "get assets for html with one png image in css style tag")]
+    public class PackageBuilderInlineStyleTests : BasePackageTest
+    {
+        [Fact(DisplayName="should return one png asset")]
+        public void ImageAsset()
+        {
+            var html = @"<html><head>
+                                <style>
+                                    body {
+                                        background-image: url(""Content/test.png"");
+                                    }
+                                </style></head><body>Hello</body></html>";
+
+            List<Asset> assets = PackageBuilder.GetHtmlAssets(html);
+
+            Assert.Equal(1, assets.Count);
+            Assert.Equal("png", assets.First().Suffix);
+        }
+    }
     [Trait("PackageBuilder", "get assets for html with one local png image and one external image")]
     public class PackageBuilderLocalTests: BasePackageTest
     {
