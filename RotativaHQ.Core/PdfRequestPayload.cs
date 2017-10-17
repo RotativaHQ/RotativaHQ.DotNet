@@ -21,5 +21,8 @@ namespace RotativaHQ.Core
 
         [ProtoMember(4)]
         public Dictionary<string, byte[]> HtmlAssets { get; set; }
+        
+        [ProtoMember(5)]
+        public string ContentDisposition { get; set; }
     }
 }

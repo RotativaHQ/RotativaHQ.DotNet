@@ -21,6 +21,8 @@ namespace RotativaHQ.MVC5
         /// </summary>
         public string FileName { get; set; }
 
+        public bool ShowInline { get; set; }
+
         /// <summary>
         /// Sets the page margins.
         /// </summary>

@@ -25,7 +25,10 @@ namespace RotativaHq.MVC5.DemoSite.Controllers
         {
             ViewBag.Message = "Your application description page.";
 
-            return View();
+            return new ViewAsPdf() {
+                FileName = "CDtest.pdf",
+                ShowInline = true
+            };
         }
 
         public ActionResult HeaderTestHeader()
