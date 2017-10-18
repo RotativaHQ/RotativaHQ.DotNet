@@ -146,6 +146,10 @@ namespace RotativaHQ.MVC5
 
         protected HttpRequestMessage CreateRawRequest(string url, string mthv, HttpMethod method)
         {
+            if (!ConfigurationManager.AppSettings.AllKeys.Contains("RotativaUrl"))
+            {
+                throw new ConfigurationErrorsException("RotativaUrl AppSetting not found");
+            }
             var apiUrl = ConfigurationManager.AppSettings["RotativaUrl"].ToString();
             var request = new HttpRequestMessage
             {

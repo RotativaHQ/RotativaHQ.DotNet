@@ -137,6 +137,10 @@ namespace RotativaHQ.MVC5
                 }
             }
             // replace href and src attributes with full URLs
+            if (!ConfigurationManager.AppSettings.AllKeys.Contains("RotativaKey"))
+            {
+                throw new ConfigurationErrorsException("RotativaKey AppSetting not found");
+            }
             var apiKey = ConfigurationManager.AppSettings["RotativaKey"].ToString();
             var client = new RotativaHqClient(apiKey);
             var contentDisposition = this.ShowInline ? "inline" : "";

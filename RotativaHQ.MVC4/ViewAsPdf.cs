@@ -137,9 +137,14 @@ namespace RotativaHQ.MVC4
                 }
             }
             // replace href and src attributes with full URLs
+            if (!ConfigurationManager.AppSettings.AllKeys.Contains("RotativaKey"))
+            {
+                throw new ConfigurationErrorsException("RotativaKey AppSetting not found");
+            }
             var apiKey = ConfigurationManager.AppSettings["RotativaKey"].ToString();
             var client = new RotativaHqClient(apiKey);
-            var fileUrl = client.GetPdfUrl(GetConvertOptions(), html.ToString(), this.FileName, header.ToString(), footer.ToString());
+            var contentDisposition = this.ShowInline ? "inline" : "";
+            var fileUrl = client.GetPdfUrl(GetConvertOptions(), html.ToString(), this.FileName, header.ToString(), footer.ToString(), contentDisposition);
             return fileUrl;
         }
     }

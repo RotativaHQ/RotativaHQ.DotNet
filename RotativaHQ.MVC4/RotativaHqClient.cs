@@ -27,7 +27,7 @@ namespace RotativaHQ.MVC4
             this.apiKey = apiKey;
         }
 
-        public string GetPdfUrl(string switches, string html, string fileName = "", string header = "", string footer = "")
+        public string GetPdfUrl(string switches, string html, string fileName = "", string header = "", string footer = "", string contentDisposition = "")
         {
             var context = HttpContext.Current;
             var webRoot = string.Format("{0}://{1}{2}",
@@ -56,7 +56,8 @@ namespace RotativaHQ.MVC4
                 Id = Guid.NewGuid(),
                 Filename = fileName,
                 Switches = switches,
-                HtmlAssets = assets
+                HtmlAssets = assets,
+                ContentDisposition = contentDisposition
             };
             string gzipIt = ConfigurationManager.AppSettings["RotativaGZip"];
             if (HttpContext.Current != null && HttpContext.Current.Request.IsLocal && gzipIt == null)
@@ -145,6 +146,10 @@ namespace RotativaHQ.MVC4
 
         protected HttpRequestMessage CreateRawRequest(string url, string mthv, HttpMethod method)
         {
+            if (!ConfigurationManager.AppSettings.AllKeys.Contains("RotativaUrl"))
+            {
+                throw new ConfigurationErrorsException("RotativaUrl AppSetting not found");
+            }
             var apiUrl = ConfigurationManager.AppSettings["RotativaUrl"].ToString();
             var request = new HttpRequestMessage
             {
