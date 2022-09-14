@@ -1,25 +1,29 @@
 ﻿<?xml version="1.0"?>
 <package >
-  <metadata>
-    <id>RotativaHQ</id>
-    <version>1.5.1-beta</version>
-    <title>RotativaHQ</title>
-    <authors>Giorgio Bozio</authors>
-    <owners>Giorgio Bozio</owners>
-    <licenseUrl>http://www.rotativahq.com/register</licenseUrl>
-    <projectUrl>http://www.rotativahq.com</projectUrl>
-    <iconUrl>https://rotativa.io/Content/assets/img/logo-blue.svg</iconUrl>
-    <requireLicenseAcceptance>false</requireLicenseAcceptance>
-    <description>Rotativa.io could service client</description>
-    <releaseNotes>Updated Newtonsoft.Json</releaseNotes>
-    <copyright>Copyright 2022</copyright>
-    <tags>Rotativa PDF AspNetMVC</tags>
-    </metadata>
-    <files>
-      <file src="bin\Debug\*.ps1" target="tools" />
-      <file src="bin\Release\*.ps1" target="tools" />
-      <file src="bin\*.ps1" target="tools" />
-      <file src="*.ps1" target="tools" />
-      <file src="*.txt" exclude="CreatePackage.txt" />
-    </files>
+	<metadata>
+		<id>RotativaHQ</id>
+		<version>1.5.1-beta</version>
+		<title>RotativaHQ</title>
+		<authors>Giorgio Bozio</authors>
+		<owners>Giorgio Bozio</owners>
+		<dependencies>
+			<group targetFramework=".NETFramework4.6.2" />
+		</dependencies>
+		<license type="expression">MIT</license>
+		<icon>logo-blue.png</icon>
+		<projectUrl>http://www.rotativahq.com</projectUrl>
+		<requireLicenseAcceptance>false</requireLicenseAcceptance>
+		<description>Rotativa.io could service client</description>
+		<releaseNotes>Updated Newtonsoft.Json</releaseNotes>
+		<copyright>Copyright 2022</copyright>
+		<tags>Rotativa PDF AspNetMVC</tags>
+	</metadata>
+	<files>
+		<file src="bin\Debug\*.ps1" target="tools" />
+		<file src="bin\Release\*.ps1" target="tools" />
+		<file src="bin\*.ps1" target="tools" />
+		<file src="*.ps1" target="tools" />
+		<file src="*.txt" exclude="CreatePackage.txt" />
+		<file src="logo-blue.png" />
+	</files>
 </package>
