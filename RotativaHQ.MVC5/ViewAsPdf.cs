@@ -31,6 +31,8 @@ namespace RotativaHQ.MVC5
         public string HeaderView { get; set; }
         public string FooterView { get; set; }
 
+        public bool PdfA { get; set; }
+
         public object Model { get; set; }
 
         public ViewAsPdf()
@@ -144,7 +146,7 @@ namespace RotativaHQ.MVC5
             var apiKey = ConfigurationManager.AppSettings["RotativaKey"].ToString();
             var client = new RotativaHqClient(apiKey);
             var contentDisposition = this.ShowInline ? "inline" : "";
-            var fileUrl = client.GetPdfUrl(GetConvertOptions(), html.ToString(), this.FileName, header.ToString(), footer.ToString(), contentDisposition);
+            var fileUrl = client.GetPdfUrl(GetConvertOptions(), html.ToString(), this.FileName, header.ToString(), footer.ToString(), contentDisposition, PdfA);
             return fileUrl;
         }
     }

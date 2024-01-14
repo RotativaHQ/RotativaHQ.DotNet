@@ -182,7 +182,7 @@ namespace RotativaHQ.Core
             	{
             	    var assetContent = GetBinaryAsset(
             	        asset.Uri, this.mapPathResolver, this.webRoot, pagePath);
-                    if (assetContent.Length > 0 && !currentContents.Any(a => a.Uri == asset.Uri))
+                    if (assetContent != null && assetContent.Length > 0 && !currentContents.Any(a => a.Uri == asset.Uri))
             	    {
                         currentContents.Add(new AssetContent
             	        {

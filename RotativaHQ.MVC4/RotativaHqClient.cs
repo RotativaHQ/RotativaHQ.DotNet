@@ -27,7 +27,7 @@ namespace RotativaHQ.MVC4
             this.apiKey = apiKey;
         }
 
-        public string GetPdfUrl(string switches, string html, string fileName = "", string header = "", string footer = "", string contentDisposition = "")
+        public string GetPdfUrl(string switches, string html, string fileName = "", string header = "", string footer = "", string contentDisposition = "", bool pdfA = false)
         {
             var context = HttpContext.Current;
             var webRoot = string.Format("{0}://{1}{2}",
@@ -57,7 +57,8 @@ namespace RotativaHQ.MVC4
                 Filename = fileName,
                 Switches = switches,
                 HtmlAssets = assets,
-                ContentDisposition = contentDisposition
+                ContentDisposition = contentDisposition,
+                PdfA = pdfA
             };
             string gzipIt = ConfigurationManager.AppSettings["RotativaGZip"];
             if (HttpContext.Current != null && HttpContext.Current.Request.IsLocal && gzipIt == null)

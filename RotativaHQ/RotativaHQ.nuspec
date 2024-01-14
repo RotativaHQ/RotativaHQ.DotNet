@@ -2,7 +2,7 @@
 <package >
 	<metadata>
 		<id>RotativaHQ</id>
-		<version>1.5.1-beta</version>
+		<version>1.6.1-beta</version>
 		<title>RotativaHQ</title>
 		<authors>Giorgio Bozio</authors>
 		<owners>Giorgio Bozio</owners>
@@ -17,13 +17,14 @@
 		<releaseNotes>Updated Newtonsoft.Json</releaseNotes>
 		<copyright>Copyright 2022</copyright>
 		<tags>Rotativa PDF AspNetMVC</tags>
+		<readme>docs\README.md</readme>
 	</metadata>
 	<files>
 		<file src="bin\Debug\*.ps1" target="tools" />
 		<file src="bin\Release\*.ps1" target="tools" />
 		<file src="bin\*.ps1" target="tools" />
 		<file src="*.ps1" target="tools" />
-		<file src="*.txt" exclude="CreatePackage.txt" />
 		<file src="logo-blue.png" />
+		<file src="README.md" target="docs\" />
 	</files>
 </package>
